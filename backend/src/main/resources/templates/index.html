@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>首页 - 学校食堂评分系统</title>
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body data-page="index">
+<header class="topbar">
+    <h1><a href="/">学校食堂评分与推荐系统</a></h1>
+    <nav>
+        <a href="/rankings">排行榜</a>
+        <a href="/login" id="loginLink">登录</a>
+        <a href="/register" id="registerLink">注册</a>
+        <button id="logoutBtn" class="link-button" style="display:none;">退出</button>
+        <span id="currentUser" class="user-badge"></span>
+    </nav>
+</header>
+
+<main class="layout">
+    <section class="main-panel">
+        <div class="card search-card">
+            <h2>搜索窗口</h2>
+            <form id="searchForm" class="inline-form">
+                <input type="text" name="keyword" placeholder="关键词（窗口名/菜品/食堂）">
+                <input type="text" name="canteenName" placeholder="食堂名称">
+                <input type="text" name="cuisineType" placeholder="菜品类型">
+                <select name="sort">
+                    <option value="score">按评分</option>
+                    <option value="hot">按热度</option>
+                    <option value="latest">按最近更新</option>
+                    <option value="name">按名称</option>
+                </select>
+                <button type="submit">搜索</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>窗口列表</h2>
+            <div id="windowList" class="window-list"></div>
+            <div class="pager">
+                <button id="prevPageBtn">上一页</button>
+                <span id="pageInfo"></span>
+                <button id="nextPageBtn">下一页</button>
+            </div>
+        </div>
+    </section>
+
+    <aside class="side-panel">
+        <div class="card">
+            <h3>高分窗口 TOP5</h3>
+            <ul id="topRatedList" class="rank-list"></ul>
+        </div>
+        <div class="card">
+            <h3>热门窗口 TOP5</h3>
+            <ul id="hotList" class="rank-list"></ul>
+        </div>
+        <div class="card">
+            <h3>最新评论</h3>
+            <ul id="latestReviewList" class="rank-list"></ul>
+        </div>
+    </aside>
+</main>
+<script src="/js/index.js" defer></script>
+</body>
+</html>

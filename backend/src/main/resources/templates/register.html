@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册 - 学校食堂评分系统</title>
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body data-page="register">
+<div class="auth-container">
+    <h1>学生注册</h1>
+    <form id="registerForm" class="card">
+        <label>学号
+            <input type="text" name="studentNo" placeholder="请输入学号" required>
+        </label>
+        <label>昵称
+            <input type="text" name="nickname" placeholder="请输入昵称" required>
+        </label>
+        <label>密码
+            <input type="password" name="password" placeholder="至少 6 位" required>
+        </label>
+        <button type="submit">注册</button>
+    </form>
+    <p>已有账号？<a href="/login">去登录</a></p>
+    <p id="authMessage" class="message"></p>
+</div>
+<script src="/js/auth.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>排行榜 - 学校食堂评分系统</title>
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body data-page="ranking">
+<header class="topbar">
+    <h1><a href="/">学校食堂评分与推荐系统</a></h1>
+    <nav>
+        <a href="/">首页</a>
+    </nav>
+</header>
+
+<main class="ranking-container">
+    <section class="card">
+        <h2>评分最高窗口</h2>
+        <ul id="rankingTopRated" class="rank-list large"></ul>
+    </section>
+    <section class="card">
+        <h2>热门窗口（按评论数）</h2>
+        <ul id="rankingHot" class="rank-list large"></ul>
+    </section>
+    <section class="card">
+        <h2>最新评论</h2>
+        <ul id="rankingLatest" class="rank-list large"></ul>
+    </section>
+</main>
+<script src="/js/ranking.js" defer></script>
+</body>
+</html>

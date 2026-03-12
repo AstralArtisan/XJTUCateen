@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="window-id" th:content="${windowId}">
+    <title>窗口详情 - 学校食堂评分系统</title>
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body data-page="window-detail">
+<header class="topbar">
+    <h1><a href="/">学校食堂评分与推荐系统</a></h1>
+    <nav>
+        <a href="/">首页</a>
+        <a href="/rankings">排行榜</a>
+    </nav>
+</header>
+
+<main class="detail-container">
+    <section class="card" id="windowDetailCard">
+        <h2 id="windowName">加载中...</h2>
+        <p id="windowMeta"></p>
+        <p id="windowIntro"></p>
+        <button id="writeReviewBtn">我要评价</button>
+    </section>
+
+    <section class="card">
+        <h3>评论列表</h3>
+        <ul id="reviewList" class="review-list"></ul>
+        <div class="pager">
+            <button id="reviewPrevBtn">上一页</button>
+            <span id="reviewPageInfo"></span>
+            <button id="reviewNextBtn">下一页</button>
+        </div>
+    </section>
+</main>
+<script src="/js/window.js" defer></script>
+</body>
+</html>

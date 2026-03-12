@@ -1,0 +1,15 @@
+﻿# Maven
+backend/target/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.tools/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker data
+mysql-data/

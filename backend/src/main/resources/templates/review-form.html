@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="window-id" th:content="${windowId}">
+    <title>评价窗口 - 学校食堂评分系统</title>
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body data-page="review-form">
+<header class="topbar">
+    <h1><a href="/">学校食堂评分与推荐系统</a></h1>
+    <nav>
+        <a href="/">首页</a>
+    </nav>
+</header>
+
+<main class="auth-container">
+    <section class="card">
+        <h2 id="reviewWindowTitle">提交评价</h2>
+        <form id="reviewForm">
+            <label>评分
+                <select name="score" required>
+                    <option value="5">5 分</option>
+                    <option value="4">4 分</option>
+                    <option value="3">3 分</option>
+                    <option value="2">2 分</option>
+                    <option value="1">1 分</option>
+                </select>
+            </label>
+            <label>评论
+                <textarea name="commentText" rows="5" maxlength="1000" placeholder="写下你的真实体验" required></textarea>
+            </label>
+            <button type="submit">提交</button>
+            <a id="backToDetail" href="#">返回详情</a>
+        </form>
+        <p id="reviewMessage" class="message"></p>
+    </section>
+</main>
+<script src="/js/review.js" defer></script>
+</body>
+</html>
