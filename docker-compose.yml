@@ -1,4 +1,22 @@
 services:
+  app:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: canteen-app
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      TZ: Asia/Shanghai
+      SERVER_PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/canteen_mvp?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root123
+    ports:
+      - "8080:8080"
+
   mysql:
     image: mysql:8.0
     container_name: canteen-mysql
@@ -16,3 +34,8 @@ services:
       - ./mysql-data:/var/lib/mysql
       # Initialize schema/demo data only when the MySQL data directory is empty.
       - ./sql:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-uroot", "-proot123"]
+      interval: 5s
+      timeout: 5s
+      retries: 20

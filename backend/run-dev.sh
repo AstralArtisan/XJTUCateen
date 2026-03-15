@@ -7,7 +7,7 @@ pkill -f "canteen-mvp-0.0.1-SNAPSHOT.jar" 2>/dev/null || true
 
 echo "[1/5] Starting MySQL (docker compose)..."
 cd ..
-docker compose up -d
+docker compose up -d mysql
 cd backend
 
 echo "[2/5] Waiting for MySQL to be ready..."

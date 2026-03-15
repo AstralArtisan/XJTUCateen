@@ -1,0 +1,8 @@
+.git
+.gitignore
+.idea/
+.vscode/
+mysql-data/
+backend/target/
+backend/.idea/
+.tools/apache-maven-3.9.9/

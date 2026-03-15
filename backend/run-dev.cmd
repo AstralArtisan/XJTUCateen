@@ -8,7 +8,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command ^
 
 echo [1/5] Starting MySQL (docker compose)...
 cd /d ".."
-docker compose up -d
+docker compose up -d mysql
 if errorlevel 1 (
   echo Failed to start MySQL with Docker.
   echo Please start Docker Desktop first, then rerun this script.

@@ -16,15 +16,34 @@ project/
 |-- frontend/                # Reserved for future Vue split
 |-- sql/                     # schema and demo data
 |-- docs/                    # API and DB docs
-|-- docker-compose.yml       # MySQL startup
+|-- docker-compose.yml       # Full stack startup (app + MySQL)
 `-- README.md
 ```
 
 ## Quick Start
 
-### 1) Start MySQL
+### Option A) Start the full project with Docker
 ```bash
-docker compose up -d
+docker compose up --build
+```
+
+Run in background if preferred:
+```bash
+docker compose up --build -d
+```
+
+Open:
+- Home: [http://localhost:8080](http://localhost:8080)
+- Login: [http://localhost:8080/login](http://localhost:8080/login)
+
+Stop the stack:
+```bash
+docker compose down
+```
+
+### Option B) Start MySQL only, then run backend locally
+```bash
+docker compose up -d mysql
 ```
 
 Default DB config:
@@ -34,7 +53,7 @@ Default DB config:
 - User: `root`
 - Password: `root123`
 
-### 2) Start backend (Recommended)
+### 2) Start backend locally
 
 Windows:
 ```powershell
@@ -54,10 +73,6 @@ Alternative (when your project path is ASCII-only):
 cd backend
 .\mvnw.cmd spring-boot:run
 ```
-
-Open:
-- Home: [http://localhost:8080](http://localhost:8080)
-- Login: [http://localhost:8080/login](http://localhost:8080/login)
 
 ## Demo Accounts
 All preloaded users use password `password`:
@@ -99,14 +114,14 @@ Windows PowerShell:
 ```powershell
 docker compose down
 Remove-Item -Recurse -Force .\mysql-data
-docker compose up -d
+docker compose up -d mysql
 ```
 
 Linux/macOS:
 ```bash
 docker compose down
 rm -rf ./mysql-data
-docker compose up -d
+docker compose up -d mysql
 ```
 
 ## Future Extensions
@@ -117,9 +132,10 @@ docker compose up -d
 - Admin maintenance for canteen windows
 
 ## Troubleshooting
-1. DB connection fails: check Docker Desktop status and 3306 port conflicts.
+1. `docker compose up --build` fails: check Docker Desktop status and whether ports `8080` or `3306` are already in use.
 2. App startup fails on first run: verify Docker can mount `sql/schema.sql` and `sql/data.sql` into MySQL.
 3. If Maven is not installed, always use `mvnw` / `mvnw.cmd`.
+4. If you previously started the app locally with `run-dev.cmd` or `java -jar`, stop that local Java process before exposing port `8080` through Docker.
 
 ## Known Issue (Windows + non-ASCII path)
 If your project path contains non-ASCII characters (for example Chinese), `mvnw spring-boot:run` may fail with:
