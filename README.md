@@ -87,13 +87,27 @@ cd backend
 ```
 
 ## Initialization
-Startup scripts:
-- `backend/src/main/resources/schema.sql`
-- `backend/src/main/resources/data.sql`
-
-Equivalent copies for manual import:
 - `sql/schema.sql`
 - `sql/data.sql`
+
+MySQL imports these scripts automatically only on first container creation, via `/docker-entrypoint-initdb.d`.
+This means data created later in the app, such as registered users and submitted reviews, will be preserved across app restarts.
+
+To fully reset the database and re-import demo data:
+
+Windows PowerShell:
+```powershell
+docker compose down
+Remove-Item -Recurse -Force .\mysql-data
+docker compose up -d
+```
+
+Linux/macOS:
+```bash
+docker compose down
+rm -rf ./mysql-data
+docker compose up -d
+```
 
 ## Future Extensions
 - Personalized recommendation (`recommendation_seed` reserved)
@@ -104,7 +118,7 @@ Equivalent copies for manual import:
 
 ## Troubleshooting
 1. DB connection fails: check Docker Desktop status and 3306 port conflicts.
-2. App startup fails: verify `schema.sql/data.sql` executed successfully.
+2. App startup fails on first run: verify Docker can mount `sql/schema.sql` and `sql/data.sql` into MySQL.
 3. If Maven is not installed, always use `mvnw` / `mvnw.cmd`.
 
 ## Known Issue (Windows + non-ASCII path)
