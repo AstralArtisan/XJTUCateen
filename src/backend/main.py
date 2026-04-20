@@ -376,15 +376,21 @@ def recommend_feed(handler):
         limit=limit,
         seed=seed,
     )
-    ai_result = llm_service.recommend_with_openrouter(
+    ai_result = llm_service.recommend_with_deepseek(
         preference_text=preference_text,
         category=category,
         candidates=items,
         user_context={"logged_in": bool(user_id), "category": category or "", "canteen_id": canteen_id},
     )
 
-    picked_order = {stall_id: index for index, stall_id in enumerate(ai_result["picked_ids"])}
-    items.sort(key=lambda item: (picked_order.get(item["stall_id"], 999), -item["match_score"], -item["review_count"], item["stall_id"]))
+    picked_ids = ai_result["picked_ids"]
+    if ai_result["enabled"] and picked_ids:
+        picked_set = set(picked_ids)
+        picked_order = {stall_id: index for index, stall_id in enumerate(picked_ids)}
+        items = [item for item in items if item["stall_id"] in picked_set]
+        items.sort(key=lambda item: picked_order.get(item["stall_id"], 999))
+    else:
+        items.sort(key=lambda item: (-item["match_score"], -item["review_count"], item["stall_id"]))
 
     return success(
         {
