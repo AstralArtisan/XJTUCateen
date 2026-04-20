@@ -5,19 +5,9 @@ import os
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
-OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-DEFAULT_API_KEY = "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"
-DEFAULT_MODEL = os.getenv("OPENROUTER_MODEL", "qwen/qwen3.6-plus:free")
-SITE_URL = os.getenv("OPENROUTER_SITE_URL", "http://127.0.0.1:5173")
-SITE_TITLE = os.getenv("OPENROUTER_SITE_TITLE", "xjtu-canteen-review")
-
-
-def _ascii_header(value: str, fallback: str):
-    try:
-        value.encode("latin-1")
-        return value
-    except UnicodeEncodeError:
-        return fallback
+DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions"
+DEFAULT_API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
+DEFAULT_MODEL = os.getenv("DEEPSEEK_MODEL", "deepseek-chat")
 
 
 def _extract_json(text: str):
@@ -49,8 +39,9 @@ def _fallback(candidates, message):
     }
 
 
-def recommend_with_openrouter(preference_text: str, category: str | None, candidates: list[dict], user_context: dict | None = None):
-    api_key = os.getenv("OPENROUTER_API_KEY", DEFAULT_API_KEY).strip()
+def recommend_with_deepseek(preference_text: str, category: str | None, candidates: list[dict], user_context: dict | None = None):
+    """使用 DeepSeek API 根据用户偏好从候选窗口中推荐餐厅。"""
+    api_key = os.getenv("DEEPSEEK_API_KEY", DEFAULT_API_KEY).strip()
     if not candidates:
         return _fallback([], "这个条件下没找到合适的窗口，换个筛选试试？")
     if not api_key:
@@ -81,10 +72,16 @@ def recommend_with_openrouter(preference_text: str, category: str | None, candid
 
     system_prompt = (
         "你是西安交通大学食堂推荐助手。"
-        "你必须只依据给定候选窗口做推荐，不要虚构新窗口。"
+        "用户会给你偏好描述和候选窗口列表，你的核心任务是：\n"
+        "1. 仔细理解用户的偏好，例如口味（清淡/辣/甜）、类型（面食/米饭/小吃）、场景等；\n"
+        "2. 从候选窗口中挑选最符合偏好的，若某窗口明显与偏好矛盾（如用户要清淡却是麻辣），必须排除；\n"
+        "3. 只从给定候选窗口中选，不得虚构；\n"
+        "4. picked_ids 数量不限，符合偏好的就选，不符合的不选，不必凑满 3 个；若全不符合可返回空数组。\n"
+        "输出规则：\n"
+        "- summary 只说推荐了什么、为什么合适，不得提及不推荐的窗口或矛盾原因；\n"
+        "- tips 给一句针对用户偏好的实用建议。\n"
         "请输出 JSON，格式为："
-        '{"summary":"一句到三句中文总结","tips":"一句中文建议","picked_ids":[1,2,3]}。'
-        "picked_ids 只保留候选窗口中的 stall_id，最多 3 个。"
+        '{"summary":"一到两句中文，只说推荐理由","tips":"一句建议","picked_ids":[...]}。'
     )
 
     body = {
@@ -93,17 +90,15 @@ def recommend_with_openrouter(preference_text: str, category: str | None, candid
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": context_text},
         ],
-        "temperature": 0.6,
+        "temperature": 0.3,
     }
     payload = json.dumps(body, ensure_ascii=False).encode("utf-8")
     request = Request(
-        OPENROUTER_URL,
+        DEEPSEEK_URL,
         data=payload,
         headers={
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
-            "HTTP-Referer": SITE_URL,
-            "X-Title": _ascii_header(SITE_TITLE, "xjtu-canteen-review"),
         },
         method="POST",
     )
@@ -111,12 +106,11 @@ def recommend_with_openrouter(preference_text: str, category: str | None, candid
     try:
         with urlopen(request, timeout=30) as response:
             data = json.loads(response.read().decode("utf-8"))
-    except HTTPError as exc:
-        detail = exc.read().decode("utf-8", errors="ignore")
-        return _fallback(candidates, f"网络开小差了，先看看这几家吧。")
-    except URLError as exc:
-        return _fallback(candidates, f"连不上推荐服务，先给你展示本地结果。")
-    except Exception as exc:
+    except HTTPError:
+        return _fallback(candidates, "网络开小差了，先看看这几家吧。")
+    except URLError:
+        return _fallback(candidates, "连不上推荐服务，先给你展示本地结果。")
+    except Exception:
         return _fallback(candidates, "推荐服务出了点问题，先看看这几家口碑不错的。")
 
     content = (
@@ -128,7 +122,7 @@ def recommend_with_openrouter(preference_text: str, category: str | None, candid
     if not parsed:
         return {
             "enabled": True,
-            "source": "openrouter",
+            "source": "deepseek",
             "model": DEFAULT_MODEL,
             "summary": content or "给你找到了几家，具体看下面的推荐。",
             "tips": "可以换个描述再试试，说得越具体推荐越准。",
@@ -141,9 +135,13 @@ def recommend_with_openrouter(preference_text: str, category: str | None, candid
 
     return {
         "enabled": True,
-        "source": "openrouter",
+        "source": "deepseek",
         "model": DEFAULT_MODEL,
         "summary": parsed.get("summary") or "给你挑了几家，看看合不合口味。",
         "tips": parsed.get("tips") or "口味变了随时可以重新说，我再给你找找。",
         "picked_ids": picked_ids[:3],
     }
+
+
+# 向后兼容别名
+recommend_with_openrouter = recommend_with_deepseek
