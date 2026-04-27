@@ -9,3 +9,4 @@ __pycache__/
 java-backend/target/
 vue-frontend/node_modules/
 vue-frontend/dist/
+*.log
