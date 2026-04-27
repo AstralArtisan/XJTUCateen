@@ -6,6 +6,7 @@ __pycache__/
 *.sqlite3
 *.sqlite3-journal
 .env
+.playwright-cli/
 java-backend/target/
 vue-frontend/node_modules/
 vue-frontend/dist/
