@@ -1,0 +1,63 @@
+[ 1850199ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:5173/api/auth/me:0
+[ 1850204ms] [WARNING] [Vue warn]: Unhandled error during execution of mounted hook 
+  at <AdminView onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > > 
+  at <RouterView> 
+  at <App> @ http://127.0.0.1:5173/node_modules/.vite/deps/chunk-SLZUSZ5I.js?v=4dc4746d:2214
+[ 1850211ms] AxiosError: Request failed with status code 500
+    at settle (http://127.0.0.1:5173/node_modules/.vite/deps/axios.js?v=aa8d1e58:1358:7)
+    at XMLHttpRequest.onloadend (http://127.0.0.1:5173/node_modules/.vite/deps/axios.js?v=aa8d1e58:1742:7)
+    at Axios.request (http://127.0.0.1:5173/node_modules/.vite/deps/axios.js?v=aa8d1e58:2398:41)
+    at async Proxy.refreshMe (http://127.0.0.1:5173/src/stores/user.js?t=1777294519814:27:17)
+    at async load (http://127.0.0.1:5173/src/views/AdminView.vue?t=1777294519814:19:3)
+[ 2242847ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:5173/api/auth/me:0
+[ 2242848ms] [WARNING] [Vue warn]: Unhandled error during execution of mounted hook 
+  at <AdminView onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > > 
+  at <RouterView> 
+  at <App> @ http://127.0.0.1:5173/node_modules/.vite/deps/chunk-SLZUSZ5I.js?v=4dc4746d:2214
+[ 2242849ms] AxiosError: Request failed with status code 500
+    at settle (http://127.0.0.1:5173/node_modules/.vite/deps/axios.js?v=aa8d1e58:1358:7)
+    at XMLHttpRequest.onloadend (http://127.0.0.1:5173/node_modules/.vite/deps/axios.js?v=aa8d1e58:1742:7)
+    at Axios.request (http://127.0.0.1:5173/node_modules/.vite/deps/axios.js?v=aa8d1e58:2398:41)
+    at async Proxy.refreshMe (http://127.0.0.1:5173/src/stores/user.js?t=1777294519814:27:17)
+    at async load (http://127.0.0.1:5173/src/views/AdminView.vue?t=1777294519814:19:3)
+[ 2242853ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:5173/api/auth/me:0
+[ 2242854ms] AxiosError: Request failed with status code 500
+    at settle (http://127.0.0.1:5173/node_modules/.vite/deps/axios.js?v=aa8d1e58:1358:7)
+    at XMLHttpRequest.onloadend (http://127.0.0.1:5173/node_modules/.vite/deps/axios.js?v=aa8d1e58:1742:7)
+[ 2410159ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:5173/api/auth/me:0
+[ 2410159ms] [WARNING] [Vue warn]: Unhandled error during execution of mounted hook 
+  at <AdminView onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > > 
+  at <RouterView> 
+  at <App> @ http://127.0.0.1:5173/node_modules/.vite/deps/chunk-SLZUSZ5I.js?v=4dc4746d:2214
+[ 2410161ms] AxiosError: Request failed with status code 500
+    at settle (http://127.0.0.1:5173/node_modules/.vite/deps/axios.js?v=aa8d1e58:1358:7)
+    at XMLHttpRequest.onloadend (http://127.0.0.1:5173/node_modules/.vite/deps/axios.js?v=aa8d1e58:1742:7)
+    at Axios.request (http://127.0.0.1:5173/node_modules/.vite/deps/axios.js?v=aa8d1e58:2398:41)
+    at async Proxy.refreshMe (http://127.0.0.1:5173/src/stores/user.js?t=1777294519814:27:17)
+    at async load (http://127.0.0.1:5173/src/views/AdminView.vue?t=1777296902884:35:3)
+[ 3679829ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:5173/api/auth/me:0
+[ 3679831ms] [WARNING] [Vue warn]: Unhandled error during execution of mounted hook 
+  at <AdminView onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > > 
+  at <RouterView> 
+  at <App> @ http://127.0.0.1:5173/node_modules/.vite/deps/chunk-SLZUSZ5I.js?v=4dc4746d:2214
+[ 3679833ms] AxiosError: Request failed with status code 500
+    at settle (http://127.0.0.1:5173/node_modules/.vite/deps/axios.js?v=aa8d1e58:1358:7)
+    at XMLHttpRequest.onloadend (http://127.0.0.1:5173/node_modules/.vite/deps/axios.js?v=aa8d1e58:1742:7)
+    at Axios.request (http://127.0.0.1:5173/node_modules/.vite/deps/axios.js?v=aa8d1e58:2398:41)
+    at async Proxy.refreshMe (http://127.0.0.1:5173/src/stores/user.js?t=1777294519814:27:17)
+    at async load (http://127.0.0.1:5173/src/views/AdminView.vue?t=1777296902884:35:3)
+[ 3679838ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:5173/api/auth/me:0
+[ 3679838ms] AxiosError: Request failed with status code 500
+    at settle (http://127.0.0.1:5173/node_modules/.vite/deps/axios.js?v=aa8d1e58:1358:7)
+    at XMLHttpRequest.onloadend (http://127.0.0.1:5173/node_modules/.vite/deps/axios.js?v=aa8d1e58:1742:7)
+[ 3679840ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:5173/api/auth/me:0
+[ 3679840ms] [WARNING] [Vue warn]: Unhandled error during execution of mounted hook 
+  at <AdminView onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) > > 
+  at <RouterView> 
+  at <App> @ http://127.0.0.1:5173/node_modules/.vite/deps/chunk-SLZUSZ5I.js?v=4dc4746d:2214
+[ 3679841ms] AxiosError: Request failed with status code 500
+    at settle (http://127.0.0.1:5173/node_modules/.vite/deps/axios.js?v=aa8d1e58:1358:7)
+    at XMLHttpRequest.onloadend (http://127.0.0.1:5173/node_modules/.vite/deps/axios.js?v=aa8d1e58:1742:7)
+    at Axios.request (http://127.0.0.1:5173/node_modules/.vite/deps/axios.js?v=aa8d1e58:2398:41)
+    at async Proxy.refreshMe (http://127.0.0.1:5173/src/stores/user.js?t=1777294519814:27:17)
+    at async load (http://127.0.0.1:5173/src/views/AdminView.vue?t=1777298172560:35:3)

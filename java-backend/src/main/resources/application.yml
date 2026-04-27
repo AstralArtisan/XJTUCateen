@@ -1,0 +1,21 @@
+﻿server:
+  port: 8000
+
+spring:
+  datasource:
+    url: ${MYSQL_URL:jdbc:mysql://127.0.0.1:3306/xjtu_canteen?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai}
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:xjtuse}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:db/schema-mysql.sql
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+
+app:
+  token-secret: ${CANTEEN_TOKEN_SECRET:xjtu_canteen_secret}
+  token-expire-seconds: 604800

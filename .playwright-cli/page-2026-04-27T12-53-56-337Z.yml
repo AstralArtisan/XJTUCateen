@@ -1,0 +1,38 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - strong [ref=e5]: 西交食堂评价系统 · Vue3
+      - navigation [ref=e6]:
+        - link "首页" [ref=e7] [cursor=pointer]:
+          - /url: "#/"
+        - link "排行榜" [ref=e8] [cursor=pointer]:
+          - /url: "#/rankings"
+        - link "个人中心" [ref=e9] [cursor=pointer]:
+          - /url: "#/profile"
+        - link "管理后台" [ref=e169] [cursor=pointer]:
+          - /url: "#/admin"
+        - generic [ref=e170]: 管理员（管理员）
+        - button "退出" [ref=e171] [cursor=pointer]
+  - main [ref=e12]:
+    - heading "管理后台" [level=2] [ref=e397]
+    - generic [ref=e398]:
+      - generic [ref=e399]:
+        - heading "标签管理" [level=3] [ref=e400]
+        - textbox "标签名" [ref=e401]
+        - textbox "描述" [ref=e402]
+        - button "新增标签" [ref=e403] [cursor=pointer]
+      - generic [ref=e404]:
+        - heading "食堂管理" [level=3] [ref=e405]
+        - textbox "名称" [ref=e406]
+        - textbox "位置" [ref=e407]
+        - textbox "描述" [ref=e408]
+        - button "新增食堂" [ref=e409] [cursor=pointer]
+      - generic [ref=e410]:
+        - heading "窗口管理" [level=3] [ref=e411]
+        - textbox "食堂ID" [ref=e412]
+        - textbox "窗口名" [ref=e413]
+        - textbox "分类" [ref=e414]
+        - textbox "描述" [ref=e415]
+        - textbox "标签，逗号分隔" [ref=e416]
+        - button "新增窗口" [ref=e417] [cursor=pointer]
+      - heading "用户权限" [level=3] [ref=e419]

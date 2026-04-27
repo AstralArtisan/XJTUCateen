@@ -1,0 +1,229 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - strong [ref=e5]: 西交食堂评价系统 · Vue3
+      - navigation [ref=e6]:
+        - link "首页" [ref=e7] [cursor=pointer]:
+          - /url: "#/"
+        - link "排行榜" [ref=e8] [cursor=pointer]:
+          - /url: "#/rankings"
+        - link "个人中心" [ref=e9] [cursor=pointer]:
+          - /url: "#/profile"
+        - link "管理后台" [ref=e169] [cursor=pointer]:
+          - /url: "#/admin"
+        - generic [ref=e170]: 管理员（管理员）
+        - button "退出" [ref=e171] [cursor=pointer]
+  - main [ref=e12]:
+    - heading "窗口列表" [level=2] [ref=e172]
+    - generic [ref=e173]:
+      - combobox [ref=e174]:
+        - option "全部食堂" [selected]
+        - option "康桥苑"
+        - option "梧桐苑"
+      - combobox [ref=e175]:
+        - option "全部分类" [selected]
+        - option "面条"
+        - option "饺子馄饨"
+        - option "米饭套餐"
+        - option "盖饭"
+        - option "炒饭"
+        - option "拌饭"
+        - option "米线粉丝"
+        - option "快餐"
+        - option "轻食"
+        - option "汤食"
+        - option "小吃"
+        - option "夜宵烧烤"
+      - combobox [ref=e176]:
+        - option "全部标签" [selected]
+        - option "出餐快"
+        - option "分量足"
+        - option "夜宵"
+        - option "小吃"
+        - option "微辣"
+        - option "性价比高"
+        - option "排队多"
+        - option "汤类"
+        - option "清淡"
+        - option "现做现卖"
+        - option "素菜多"
+        - option "肉量足"
+        - option "适合减脂"
+        - option "重口味"
+        - option "陕西风味"
+        - option "面条"
+      - textbox "关键字" [ref=e177]
+      - combobox [ref=e178]:
+        - option "默认排序" [selected]
+        - option "评分优先"
+        - option "热度优先"
+      - button "查询" [ref=e179] [cursor=pointer]
+    - generic [ref=e180]:
+      - article [ref=e181]:
+        - heading "蛋炒饭窗口" [level=3] [ref=e182]
+        - paragraph [ref=e183]: 梧桐苑 · 炒饭
+        - paragraph [ref=e184]: 评分 4.0 / 评论 3
+        - link "查看详情" [ref=e185] [cursor=pointer]:
+          - /url: "#/stall/28"
+      - article [ref=e186]:
+        - heading "豆浆油条窗口" [level=3] [ref=e187]
+        - paragraph [ref=e188]: 梧桐苑 · 小吃
+        - paragraph [ref=e189]: 评分 4.7 / 评论 3
+        - link "查看详情" [ref=e190] [cursor=pointer]:
+          - /url: "#/stall/27"
+      - article [ref=e191]:
+        - heading "卤肉饭窗口" [level=3] [ref=e192]
+        - paragraph [ref=e193]: 梧桐苑 · 米饭套餐
+        - paragraph [ref=e194]: 评分 4.7 / 评论 3
+        - link "查看详情" [ref=e195] [cursor=pointer]:
+          - /url: "#/stall/26"
+      - article [ref=e196]:
+        - heading "番茄鸡蛋面窗口" [level=3] [ref=e197]
+        - paragraph [ref=e198]: 梧桐苑 · 面条
+        - paragraph [ref=e199]: 评分 4.3 / 评论 3
+        - link "查看详情" [ref=e200] [cursor=pointer]:
+          - /url: "#/stall/25"
+      - article [ref=e201]:
+        - heading "凉皮凉面窗口" [level=3] [ref=e202]
+        - paragraph [ref=e203]: 梧桐苑 · 小吃
+        - paragraph [ref=e204]: 评分 4.5 / 评论 4
+        - link "查看详情" [ref=e205] [cursor=pointer]:
+          - /url: "#/stall/24"
+      - article [ref=e206]:
+        - heading "烤鸭饭窗口" [level=3] [ref=e207]
+        - paragraph [ref=e208]: 梧桐苑 · 盖饭
+        - paragraph [ref=e209]: 评分 4.3 / 评论 3
+        - link "查看详情" [ref=e210] [cursor=pointer]:
+          - /url: "#/stall/23"
+      - article [ref=e211]:
+        - heading "土豆粉窗口" [level=3] [ref=e212]
+        - paragraph [ref=e213]: 梧桐苑 · 米线粉丝
+        - paragraph [ref=e214]: 评分 4.3 / 评论 3
+        - link "查看详情" [ref=e215] [cursor=pointer]:
+          - /url: "#/stall/22"
+      - article [ref=e216]:
+        - heading "小笼包蒸饺窗口" [level=3] [ref=e217]
+        - paragraph [ref=e218]: 梧桐苑 · 饺子馄饨
+        - paragraph [ref=e219]: 评分 4.3 / 评论 3
+        - link "查看详情" [ref=e220] [cursor=pointer]:
+          - /url: "#/stall/21"
+      - article [ref=e221]:
+        - heading "炸酱面窗口" [level=3] [ref=e222]
+        - paragraph [ref=e223]: 梧桐苑 · 面条
+        - paragraph [ref=e224]: 评分 4.3 / 评论 3
+        - link "查看详情" [ref=e225] [cursor=pointer]:
+          - /url: "#/stall/20"
+      - article [ref=e226]:
+        - heading "砂锅粥窗口" [level=3] [ref=e227]
+        - paragraph [ref=e228]: 梧桐苑 · 汤食
+        - paragraph [ref=e229]: 评分 4.3 / 评论 4
+        - link "查看详情" [ref=e230] [cursor=pointer]:
+          - /url: "#/stall/19"
+      - article [ref=e231]:
+        - heading "夜宵烧烤窗口" [level=3] [ref=e232]
+        - paragraph [ref=e233]: 梧桐苑 · 夜宵烧烤
+        - paragraph [ref=e234]: 评分 4.3 / 评论 3
+        - link "查看详情" [ref=e235] [cursor=pointer]:
+          - /url: "#/stall/18"
+      - article [ref=e236]:
+        - heading "馄饨水饺窗口" [level=3] [ref=e237]
+        - paragraph [ref=e238]: 梧桐苑 · 饺子馄饨
+        - paragraph [ref=e239]: 评分 4.8 / 评论 4
+        - link "查看详情" [ref=e240] [cursor=pointer]:
+          - /url: "#/stall/17"
+      - article [ref=e241]:
+        - heading "香锅拌饭窗口" [level=3] [ref=e242]
+        - paragraph [ref=e243]: 梧桐苑 · 拌饭
+        - paragraph [ref=e244]: 评分 4.3 / 评论 4
+        - link "查看详情" [ref=e245] [cursor=pointer]:
+          - /url: "#/stall/16"
+      - article [ref=e246]:
+        - heading "重庆小面窗口" [level=3] [ref=e247]
+        - paragraph [ref=e248]: 梧桐苑 · 面条
+        - paragraph [ref=e249]: 评分 4.5 / 评论 4
+        - link "查看详情" [ref=e250] [cursor=pointer]:
+          - /url: "#/stall/15"
+      - article [ref=e251]:
+        - heading "自选盖饭窗口" [level=3] [ref=e252]
+        - paragraph [ref=e253]: 梧桐苑 · 盖饭
+        - paragraph [ref=e254]: 评分 4.3 / 评论 4
+        - link "查看详情" [ref=e255] [cursor=pointer]:
+          - /url: "#/stall/14"
+      - article [ref=e256]:
+        - heading "牛肉面窗口" [level=3] [ref=e257]
+        - paragraph [ref=e258]: 梧桐苑 · 面条
+        - paragraph [ref=e259]: 评分 4.6 / 评论 5
+        - link "查看详情" [ref=e260] [cursor=pointer]:
+          - /url: "#/stall/13"
+      - article [ref=e261]:
+        - heading "麻辣烫窗口" [level=3] [ref=e262]
+        - paragraph [ref=e263]: 康桥苑 · 快餐
+        - paragraph [ref=e264]: 评分 4.0 / 评论 4
+        - link "查看详情" [ref=e265] [cursor=pointer]:
+          - /url: "#/stall/12"
+      - article [ref=e266]:
+        - heading "蒸饭窗口" [level=3] [ref=e267]
+        - paragraph [ref=e268]: 康桥苑 · 米饭套餐
+        - paragraph [ref=e269]: 评分 4.0 / 评论 3
+        - link "查看详情" [ref=e270] [cursor=pointer]:
+          - /url: "#/stall/11"
+      - article [ref=e271]:
+        - heading "肉夹馍窗口" [level=3] [ref=e272]
+        - paragraph [ref=e273]: 康桥苑 · 小吃
+        - paragraph [ref=e274]: 评分 4.5 / 评论 4
+        - link "查看详情" [ref=e275] [cursor=pointer]:
+          - /url: "#/stall/10"
+      - article [ref=e276]:
+        - heading "酸辣粉窗口" [level=3] [ref=e277]
+        - paragraph [ref=e278]: 康桥苑 · 米线粉丝
+        - paragraph [ref=e279]: 评分 4.3 / 评论 3
+        - link "查看详情" [ref=e280] [cursor=pointer]:
+          - /url: "#/stall/9"
+      - article [ref=e281]:
+        - heading "鸡排小吃窗口" [level=3] [ref=e282]
+        - paragraph [ref=e283]: 康桥苑 · 小吃
+        - paragraph [ref=e284]: 评分 4.3 / 评论 3
+        - link "查看详情" [ref=e285] [cursor=pointer]:
+          - /url: "#/stall/8"
+      - article [ref=e286]:
+        - heading "猪脚饭窗口" [level=3] [ref=e287]
+        - paragraph [ref=e288]: 康桥苑 · 盖饭
+        - paragraph [ref=e289]: 评分 4.3 / 评论 3
+        - link "查看详情" [ref=e290] [cursor=pointer]:
+          - /url: "#/stall/7"
+      - article [ref=e291]:
+        - heading "轻食沙拉窗口" [level=3] [ref=e292]
+        - paragraph [ref=e293]: 康桥苑 · 轻食
+        - paragraph [ref=e294]: 评分 4.0 / 评论 3
+        - link "查看详情" [ref=e295] [cursor=pointer]:
+          - /url: "#/stall/6"
+      - article [ref=e296]:
+        - heading "砂锅米线窗口" [level=3] [ref=e297]
+        - paragraph [ref=e298]: 康桥苑 · 米线粉丝
+        - paragraph [ref=e299]: 评分 4.8 / 评论 4
+        - link "查看详情" [ref=e300] [cursor=pointer]:
+          - /url: "#/stall/5"
+      - article [ref=e301]:
+        - heading "铁板炒饭窗口" [level=3] [ref=e302]
+        - paragraph [ref=e303]: 康桥苑 · 炒饭
+        - paragraph [ref=e304]: 评分 4.0 / 评论 3
+        - link "查看详情" [ref=e305] [cursor=pointer]:
+          - /url: "#/stall/4"
+      - article [ref=e306]:
+        - heading "兰州拉面窗口" [level=3] [ref=e307]
+        - paragraph [ref=e308]: 康桥苑 · 面条
+        - paragraph [ref=e309]: 评分 4.5 / 评论 4
+        - link "查看详情" [ref=e310] [cursor=pointer]:
+          - /url: "#/stall/3"
+      - article [ref=e311]:
+        - heading "麻辣香锅窗口" [level=3] [ref=e312]
+        - paragraph [ref=e313]: 康桥苑 · 快餐
+        - paragraph [ref=e314]: 评分 4.0 / 评论 4
+        - link "查看详情" [ref=e315] [cursor=pointer]:
+          - /url: "#/stall/2"
+      - article [ref=e316]:
+        - heading "黄焖鸡米饭窗口" [level=3] [ref=e317]
+        - paragraph [ref=e318]: 康桥苑 · 米饭套餐
+        - paragraph [ref=e319]: 评分 4.4 / 评论 5
+        - link "查看详情" [ref=e320] [cursor=pointer]:
+          - /url: "#/stall/1"
