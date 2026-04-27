@@ -23,7 +23,10 @@ const logout = async () => {
 <template>
   <header class="topbar">
     <div class="container topbar-inner">
-      <RouterLink class="brand" to="/">西交食堂评价系统</RouterLink>
+      <RouterLink class="brand" to="/">
+        <span class="brand-mark">交</span>
+        <span>西交食堂评价系统</span>
+      </RouterLink>
       <nav class="nav">
         <RouterLink to="/">首页</RouterLink>
         <RouterLink to="/rankings">排行榜</RouterLink>

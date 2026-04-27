@@ -17,11 +17,17 @@ const submit = async () => {
 </script>
 
 <template>
-  <h2>登录</h2>
-  <form class="panel stack" style="max-width:420px;" @submit.prevent="submit">
+  <section class="auth-shell">
+    <div>
+      <p class="eyebrow">WELCOME BACK</p>
+      <h2>登录</h2>
+      <p class="muted">进入个人中心，管理收藏、黑名单和你的口味偏好。</p>
+    </div>
+    <form class="panel stack auth-card" @submit.prevent="submit">
     <input v-model="form.student_id" placeholder="账号 / 学号" required />
     <input v-model="form.password" placeholder="密码" type="password" required />
     <button type="submit">登录</button>
     <RouterLink to="/register">没有账号？去注册</RouterLink>
   </form>
+  </section>
 </template>

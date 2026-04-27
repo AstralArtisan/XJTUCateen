@@ -15,12 +15,18 @@ const submit = async () => {
 </script>
 
 <template>
-  <h2>注册</h2>
-  <form class="panel stack" style="max-width:420px;" @submit.prevent="submit">
+  <section class="auth-shell">
+    <div>
+      <p class="eyebrow">JOIN THE TABLE</p>
+      <h2>注册</h2>
+      <p class="muted">创建账号后即可评价窗口、保存偏好并使用推荐能力。</p>
+    </div>
+    <form class="panel stack auth-card" @submit.prevent="submit">
     <input v-model="form.student_id" placeholder="学号" required />
     <input v-model="form.username" placeholder="昵称" required />
     <input v-model="form.password" placeholder="密码" type="password" required />
     <button type="submit">注册</button>
     <RouterLink to="/login">已有账号？去登录</RouterLink>
   </form>
+  </section>
 </template>

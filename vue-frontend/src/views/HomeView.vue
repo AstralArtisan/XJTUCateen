@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { nextTick, onMounted, reactive, ref } from 'vue'
 import { api } from '../api/client'
 import { useUserStore } from '../stores/user'
 
@@ -16,6 +16,11 @@ const loading = ref(false)
 const filters = reactive({ canteen_id: '', category: '', tag_name: '', keyword: '', sort_by: '' })
 
 const cleanParams = () => Object.fromEntries(Object.entries(filters).filter(([, v]) => v !== ''))
+
+const scrollToStalls = async () => {
+  await nextTick()
+  document.getElementById('stall-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
 
 const loadBase = async () => {
   const [c, g, t] = await Promise.all([api.canteens(), api.categories(), api.tags()])
@@ -53,10 +58,22 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="row" style="justify-content:space-between;margin-bottom:14px;">
-    <h2 style="margin:0;">窗口列表</h2>
-    <button type="button" @click="pickToday">今天吃什么？</button>
-  </div>
+  <section class="home-hero">
+    <div>
+      <p class="eyebrow">XJTU CANTEEN GUIDE</p>
+      <h1>把下一顿饭，交给真实评价。</h1>
+      <p class="hero-copy">筛选食堂窗口、查看同学评分，用偏好推荐快速找到今天适合你的选择。</p>
+      <div class="hero-actions">
+        <button type="button" @click="pickToday">今天吃什么？</button>
+        <button class="link-button" type="button" @click="scrollToStalls">浏览窗口</button>
+      </div>
+    </div>
+    <div class="hero-ticket">
+      <span>今日饭票</span>
+      <strong>{{ today?.stall_name || '等待抽取' }}</strong>
+      <small>{{ today?.canteen_name || '点击按钮生成推荐' }}</small>
+    </div>
+  </section>
 
   <section v-if="today" class="panel stack" style="margin-bottom:16px;">
     <strong>今日推荐：{{ today.stall_name }}</strong>
@@ -106,8 +123,8 @@ onMounted(async () => {
     </div>
   </section>
 
-  <div v-if="stalls.length" class="grid">
-    <article v-for="s in stalls" :key="s.id" class="card">
+  <div id="stall-list" v-if="stalls.length" class="grid">
+    <article v-for="s in stalls" :key="s.id" class="card stall-card">
       <h3>{{ s.name }}</h3>
       <p class="muted">{{ s.canteen_name }} · {{ s.category || '未分类' }}</p>
       <p><span class="score">{{ Number(s.avg_rating || 0).toFixed(1) }}</span> 分 · {{ s.review_count || 0 }} 条评价</p>

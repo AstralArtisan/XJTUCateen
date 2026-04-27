@@ -12,6 +12,7 @@ const router = createRouter({
   history: createWebHashHistory(),
   routes: [
     { path: '/', component: HomeView },
+    { path: '/stall-list', redirect: { path: '/', hash: '#stall-list' } },
     { path: '/login', component: LoginView },
     { path: '/register', component: RegisterView },
     { path: '/stall/:id', component: StallView },
