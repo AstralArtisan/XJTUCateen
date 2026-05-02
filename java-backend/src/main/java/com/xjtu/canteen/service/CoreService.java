@@ -8,7 +8,9 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Service;
 
 import java.sql.PreparedStatement;
-import java.sql.Statement;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -340,8 +342,8 @@ public class CoreService {
 
     public Map<String, Object> addHistory(Long userId, Long stallId) {
         Map<String, Object> recent = one(
-            "SELECT id FROM history WHERE user_id = ? AND stall_id = ? AND visited_at >= DATE_SUB(NOW(), INTERVAL 30 MINUTE) ORDER BY visited_at DESC, id DESC LIMIT 1",
-            userId, stallId
+            "SELECT id FROM history WHERE user_id = ? AND stall_id = ? AND visited_at >= ? ORDER BY visited_at DESC, id DESC LIMIT 1",
+            userId, stallId, Timestamp.from(Instant.now().minus(30, ChronoUnit.MINUTES))
         );
         if (recent == null) {
             jdbc.update("INSERT INTO history (user_id, stall_id) VALUES (?, ?)", userId, stallId);
@@ -536,7 +538,7 @@ public class CoreService {
     private Long insertAndReturnId(String sql, Object... params) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbc.update(conn -> {
-            PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = conn.prepareStatement(sql, new String[]{"id"});
             for (int i = 0; i < params.length; i++) ps.setObject(i + 1, params[i]);
             return ps;
         }, keyHolder);

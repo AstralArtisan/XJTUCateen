@@ -1,52 +1,51 @@
 """
-运行全部测试并生成 HTML 测试报告。
+Run the current Java backend and Vue frontend verification suite.
 
-用法（在项目根目录执行）：
+Usage:
     python run_tests.py
 """
+from __future__ import annotations
+
 import subprocess
 import sys
-import os
-
-ROOT = os.path.dirname(__file__)
-SRC = os.path.join(ROOT, "src")
-REPORT = os.path.join(ROOT, "docs", "reports", "测试报告.html")
+from shutil import which
+from pathlib import Path
 
 
-def main():
-    print("=" * 52)
-    print("  西交食堂评价系统 — 自动化测试")
-    print("=" * 52)
+ROOT = Path(__file__).resolve().parent
 
-    # 检查 pytest-html 是否安装
-    try:
-        import pytest_html  # noqa
-    except ImportError:
-        print("[提示] 正在安装 pytest-html...")
-        subprocess.run([sys.executable, "-m", "pip", "install", "pytest-html", "-q"], check=True)
 
-    cmd = [
-        sys.executable, "-m", "pytest",
-        "src/backend/tests/",
-        "--html", REPORT,
-        "--self-contained-html",
-        "-v",
-        "--tb=short",
-        "--no-header",
-    ]
-
-    env = os.environ.copy()
-    env["PYTHONPATH"] = SRC
-
-    result = subprocess.run(cmd, cwd=ROOT, env=env)
-
+def run_step(name: str, command: list[str], cwd: Path) -> int:
+    print("=" * 60)
+    print(f"  {name}")
+    print("=" * 60)
+    executable = which(command[0])
+    if executable is None:
+        print(f"[FAIL] Command not found: {command[0]}")
+        return 127
+    result = subprocess.run([executable, *command[1:]], cwd=cwd)
     print()
     if result.returncode == 0:
-        print(f"✓ 全部测试通过！报告已生成：{REPORT}")
+        print(f"[OK] {name}")
     else:
-        print(f"✗ 存在失败用例，请查看报告：{REPORT}")
-
+        print(f"[FAIL] {name}")
+    print()
     return result.returncode
+
+
+def main() -> int:
+    steps = [
+        ("Java backend tests", ["mvn", "test"], ROOT / "java-backend"),
+        ("Vue frontend build", ["npm", "run", "build"], ROOT / "vue-frontend"),
+    ]
+
+    for name, command, cwd in steps:
+        code = run_step(name, command, cwd)
+        if code != 0:
+            return code
+
+    print("All checks passed.")
+    return 0
 
 
 if __name__ == "__main__":

@@ -61,8 +61,8 @@ onMounted(async () => {
   <section class="home-hero">
     <div>
       <p class="eyebrow">XJTU CANTEEN GUIDE</p>
-      <h1>把下一顿饭，交给真实评价。</h1>
-      <p class="hero-copy">筛选食堂窗口、查看同学评分，用偏好推荐快速找到今天适合你的选择。</p>
+      <h1>把下一顿饭，交给真实评价</h1>
+      <p class="hero-copy">筛选食堂窗口、查看同学评分，用偏好推荐快速找到今天适合你的选择</p>
       <div class="hero-actions">
         <button type="button" @click="pickToday">今天吃什么？</button>
         <button class="link-button" type="button" @click="scrollToStalls">浏览窗口</button>

@@ -2,10 +2,12 @@
 import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { api } from '../api/client'
+import { useToast } from '../composables/toast'
 import { useUserStore } from '../stores/user'
 
 const router = useRouter()
 const user = useUserStore()
+const toast = useToast()
 const activeTab = ref('tags')
 const users = ref([])
 const tags = ref([])
@@ -48,18 +50,20 @@ const load = async () => {
 
 const createTag = async () => {
   const r = await api.adminCreateTag({ name: form.tag, description: form.tagDesc })
-  if (r.code !== 0) return alert(r.message)
+  if (r.code !== 0) return toast.error(r.message || '创建失败')
   form.tag = ''
   form.tagDesc = ''
+  toast.success('标签已创建')
   await load()
 }
 
 const createCanteen = async () => {
   const r = await api.adminCreateCanteen({ name: form.canteenName, location: form.canteenLoc, description: form.canteenDesc })
-  if (r.code !== 0) return alert(r.message)
+  if (r.code !== 0) return toast.error(r.message || '创建失败')
   form.canteenName = ''
   form.canteenLoc = ''
   form.canteenDesc = ''
+  toast.success('食堂已创建')
   await load()
 }
 
@@ -72,29 +76,32 @@ const createStall = async () => {
     tags: form.stallTags.split(/[,，]/).map((s) => s.trim()).filter(Boolean),
   }
   const r = await api.adminCreateStall(payload)
-  if (r.code !== 0) return alert(r.message)
+  if (r.code !== 0) return toast.error(r.message || '创建失败')
   form.stallName = ''
   form.stallDesc = ''
   form.stallTags = ''
+  toast.success('窗口已创建')
   await load()
 }
 
 const disableStall = async (id) => {
   const r = await api.adminDeleteStall(id)
-  if (r.code !== 0) return alert(r.message)
+  if (r.code !== 0) return toast.error(r.message || '停用失败')
+  toast.success('窗口已停用')
   await load()
 }
 
 const deleteReview = async () => {
   const r = await api.adminDeleteReview(form.reviewId)
-  if (r.code !== 0) return alert(r.message)
+  if (r.code !== 0) return toast.error(r.message || '删除失败')
   form.reviewId = ''
-  alert('评论已删除')
+  toast.success('评论已删除')
 }
 
 const setRole = async (item, role) => {
   const r = await api.adminUpdateUserRole(item.id, { role })
-  if (r.code !== 0) return alert(r.message)
+  if (r.code !== 0) return toast.error(r.message || '更新失败')
+  toast.success('角色已更新')
   await load()
 }
 

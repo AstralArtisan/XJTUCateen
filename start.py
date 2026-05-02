@@ -1,85 +1,65 @@
-"""一键启动前后端服务并打开浏览器。
+"""Start the Java backend and Vue frontend together.
 
-用法：在项目根目录执行
+Usage:
     python start.py
 """
+from __future__ import annotations
 
-import atexit
 import os
+import signal
+import subprocess
 import sys
 import time
-import threading
 import webbrowser
-from http.server import SimpleHTTPRequestHandler, HTTPServer
-
-BACKEND_HOST = "127.0.0.1"
-BACKEND_PORT = 8000
-FRONTEND_HOST = "127.0.0.1"
-FRONTEND_PORT = 5173
-FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "src", "frontend")
-
-_servers = []
+from pathlib import Path
 
 
-def _shutdown_all():
-    for srv in _servers:
-        try:
-            srv.shutdown()
-        except Exception:
-            pass
+ROOT = Path(__file__).resolve().parent
+BACKEND_URL = "http://127.0.0.1:8000"
+FRONTEND_URL = "http://127.0.0.1:5173"
 
 
-atexit.register(_shutdown_all)
+def start_process(name: str, command: list[str], cwd: Path) -> subprocess.Popen:
+    print(f"[{name}] {' '.join(command)}")
+    return subprocess.Popen(command, cwd=cwd)
 
 
-def start_backend():
-    root = os.path.dirname(__file__)
-    src_dir = os.path.join(root, "src")
-    if src_dir not in sys.path:
-        sys.path.insert(0, src_dir)
-
-    from backend.database.db import init_db
-    from backend.main import AppHandler
-    from http.server import ThreadingHTTPServer
-
-    init_db()
-    server = ThreadingHTTPServer((BACKEND_HOST, BACKEND_PORT), AppHandler)
-    _servers.append(server)
-    print(f"[后端] http://{BACKEND_HOST}:{BACKEND_PORT}")
-    server.serve_forever()
+def stop_process(proc: subprocess.Popen) -> None:
+    if proc.poll() is not None:
+        return
+    if os.name == "nt":
+        proc.terminate()
+    else:
+        proc.send_signal(signal.SIGTERM)
 
 
-def start_frontend():
-    os.chdir(FRONTEND_DIR)
-    server = HTTPServer((FRONTEND_HOST, FRONTEND_PORT), SimpleHTTPRequestHandler)
-    _servers.append(server)
-    print(f"[前端] http://{FRONTEND_HOST}:{FRONTEND_PORT}")
-    server.serve_forever()
-
-
-def main():
+def main() -> int:
     print("=" * 44)
-    print("  西交食堂评价系统 — 一键启动")
+    print("  西交食堂评价系统 - 一键启动")
     print("=" * 44)
 
-    t_back = threading.Thread(target=start_backend, daemon=True)
-    t_front = threading.Thread(target=start_frontend, daemon=True)
-
-    t_back.start()
-    t_front.start()
-
-    time.sleep(1.5)
-    url = f"http://{FRONTEND_HOST}:{FRONTEND_PORT}"
-    print(f"\n正在打开浏览器: {url}\n按 Ctrl+C 停止服务。\n")
-    webbrowser.open(url)
+    processes = [
+        start_process("后端", ["mvn", "spring-boot:run"], ROOT / "java-backend"),
+        start_process("前端", ["npm", "run", "dev"], ROOT / "vue-frontend"),
+    ]
 
     try:
-        while True:
+        time.sleep(2)
+        print(f"\n后端: {BACKEND_URL}")
+        print(f"前端: {FRONTEND_URL}")
+        print("按 Ctrl+C 停止服务。\n")
+        webbrowser.open(FRONTEND_URL)
+
+        while all(proc.poll() is None for proc in processes):
             time.sleep(1)
+        return next((proc.returncode for proc in processes if proc.returncode), 0)
     except KeyboardInterrupt:
-        print("\n已停止。")
-        os._exit(0)
+        print("\n正在停止服务...")
+        return 0
+    finally:
+        for proc in processes:
+            stop_process(proc)
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

@@ -2,14 +2,16 @@
 import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { api } from '../api/client'
+import { useToast } from '../composables/toast'
 
 const form = reactive({ student_id: '', username: '', password: '' })
 const router = useRouter()
+const toast = useToast()
 
 const submit = async () => {
   const r = await api.register(form)
-  if (r.code !== 0) return alert(r.message || '注册失败')
-  alert('注册成功，请登录')
+  if (r.code !== 0) return toast.error(r.message || '注册失败')
+  toast.success('注册成功，请登录')
   router.push('/login')
 }
 </script>

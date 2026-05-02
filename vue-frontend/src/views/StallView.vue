@@ -2,11 +2,13 @@
 import { onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { api } from '../api/client'
+import { useToast } from '../composables/toast'
 import { useUserStore } from '../stores/user'
 
 const route = useRoute()
 const router = useRouter()
 const user = useUserStore()
+const toast = useToast()
 const detail = ref(null)
 const reviews = ref([])
 const form = reactive({ rating: 5, content: '' })
@@ -31,21 +33,24 @@ const requireLogin = () => {
 const submit = async () => {
   if (!requireLogin()) return
   const r = await api.submitReview({ stall_id: Number(route.params.id), rating: Number(form.rating), content: form.content })
-  if (r.code !== 0) return alert(r.message || '提交失败')
+  if (r.code !== 0) return toast.error(r.message || '提交失败')
   form.content = ''
+  toast.success('评论已提交')
   await load()
 }
 
 const addFav = async () => {
   if (!requireLogin()) return
   const r = await api.addFavorite({ stall_id: Number(route.params.id) })
-  alert(r.code === 0 ? '已收藏' : r.message)
+  if (r.code === 0) toast.success('已收藏')
+  else toast.error(r.message || '收藏失败')
 }
 
 const addBlack = async () => {
   if (!requireLogin()) return
   const r = await api.addBlacklist({ stall_id: Number(route.params.id) })
-  alert(r.code === 0 ? '已加入黑名单' : r.message)
+  if (r.code === 0) toast.success('已加入黑名单')
+  else toast.error(r.message || '操作失败')
 }
 
 onMounted(load)

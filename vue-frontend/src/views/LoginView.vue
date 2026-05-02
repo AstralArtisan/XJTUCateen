@@ -2,15 +2,17 @@
 import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { api } from '../api/client'
+import { useToast } from '../composables/toast'
 import { useUserStore } from '../stores/user'
 
 const form = reactive({ student_id: '', password: '' })
 const router = useRouter()
 const user = useUserStore()
+const toast = useToast()
 
 const submit = async () => {
   const r = await api.login(form)
-  if (r.code !== 0) return alert(r.message || '登录失败')
+  if (r.code !== 0) return toast.error(r.message || '登录失败')
   user.setSession(r.data.token, r.data.user)
   router.push('/')
 }

@@ -29,7 +29,7 @@ Run migration:
 
 ```bash
 python scripts/sqlite_to_mysql.py \
-  --sqlite src/backend/database/canteen.sqlite3 \
+  --sqlite path/to/legacy-canteen.sqlite3 \
   --mysql-host 127.0.0.1 --mysql-port 3306 \
   --mysql-user root --mysql-password xjtuse --mysql-db xjtu_canteen
 ```

@@ -2,10 +2,12 @@
 import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { api } from '../api/client'
+import { useToast } from '../composables/toast'
 import { useUserStore } from '../stores/user'
 
 const router = useRouter()
 const userStore = useUserStore()
+const toast = useToast()
 const profile = reactive({ student_id: '', username: '', signature: '', preference_text: '', avatar_url: '' })
 const password = reactive({ old_password: '', new_password: '' })
 const editReview = reactive({ id: null, rating: 5, content: '' })
@@ -50,18 +52,18 @@ const readAvatar = (event) => {
 
 const saveProfile = async () => {
   const r = await api.updateProfile(profile)
-  if (r.code !== 0) return alert(r.message || '保存失败')
+  if (r.code !== 0) return toast.error(r.message || '保存失败')
   userStore.setSession(userStore.token, r.data)
-  alert('资料已保存')
+  toast.success('资料已保存')
   await load()
 }
 
 const savePassword = async () => {
   const r = await api.changePassword(password)
-  if (r.code !== 0) return alert(r.message || '修改失败')
+  if (r.code !== 0) return toast.error(r.message || '修改失败')
   password.old_password = ''
   password.new_password = ''
-  alert('密码已修改')
+  toast.success('密码已修改')
 }
 
 const startEditReview = (item) => {
@@ -72,26 +74,30 @@ const startEditReview = (item) => {
 
 const saveReview = async () => {
   const r = await api.updateMyReview(editReview.id, { rating: Number(editReview.rating), content: editReview.content })
-  if (r.code !== 0) return alert(r.message || '保存失败')
+  if (r.code !== 0) return toast.error(r.message || '保存失败')
   editReview.id = null
+  toast.success('评价已保存')
   await load()
 }
 
 const deleteReview = async (id) => {
   const r = await api.deleteMyReview(id)
-  if (r.code !== 0) return alert(r.message)
+  if (r.code !== 0) return toast.error(r.message || '删除失败')
+  toast.success('评价已删除')
   await load()
 }
 
 const removeFavorite = async (id) => {
   const r = await api.deleteFavorite(id)
-  if (r.code !== 0) return alert(r.message)
+  if (r.code !== 0) return toast.error(r.message || '取消失败')
+  toast.success('已取消收藏')
   await load()
 }
 
 const removeBlacklist = async (id) => {
   const r = await api.deleteBlacklist(id)
-  if (r.code !== 0) return alert(r.message)
+  if (r.code !== 0) return toast.error(r.message || '移除失败')
+  toast.success('已移出黑名单')
   await load()
 }
 

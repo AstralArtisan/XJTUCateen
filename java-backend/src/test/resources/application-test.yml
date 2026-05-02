@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:xjtu_canteen_test;MODE=MySQL;NON_KEYWORDS=USER;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:db/schema-mysql.sql
+
+app:
+  token-secret: test_secret_for_junit
+  token-expire-seconds: 604800

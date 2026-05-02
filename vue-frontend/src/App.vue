@@ -2,6 +2,8 @@
 import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { api } from './api/client'
+import AiAssistant from './components/AiAssistant.vue'
+import ToastStack from './components/ToastStack.vue'
 import { useUserStore } from './stores/user'
 
 const user = useUserStore()
@@ -46,4 +48,6 @@ const logout = async () => {
   <main class="container page">
     <RouterView />
   </main>
+  <AiAssistant />
+  <ToastStack />
 </template>
