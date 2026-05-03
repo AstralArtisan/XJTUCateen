@@ -138,6 +138,24 @@ public class ApiController {
         return ResponseEntity.ok(ApiResponse.success(item));
     }
 
+    @PostMapping("/reviews/{id}/likes")
+    public ResponseEntity<ApiResponse> likeReview(HttpServletRequest request, @PathVariable Long id) {
+        Long uid = authUserId(request);
+        if (uid == null) return unauthorized("not_login");
+        Map<String, Object> item = coreService.likeReview(uid, id);
+        if (item == null) return notFound("not_found");
+        return ResponseEntity.ok(ApiResponse.success(item));
+    }
+
+    @PostMapping("/reviews/{id}/reports")
+    public ResponseEntity<ApiResponse> reportReview(HttpServletRequest request, @PathVariable Long id, @RequestBody Map<String, Object> body) {
+        Long uid = authUserId(request);
+        if (uid == null) return unauthorized("not_login");
+        Map<String, Object> item = coreService.reportReview(uid, id, nullableString(body.get("reason")));
+        if (item == null) return notFound("not_found");
+        return ResponseEntity.ok(ApiResponse.success(item));
+    }
+
     @GetMapping("/rankings/score")
     public ResponseEntity<ApiResponse> rankScore(@RequestParam(defaultValue = "10") int limit, @RequestParam(name = "canteen_id", required = false) Long canteenId) {
         return ResponseEntity.ok(ApiResponse.success(Map.of("list", coreService.rankingScore(limit, canteenId))));
@@ -312,6 +330,26 @@ public class ApiController {
         return ResponseEntity.ok(ApiResponse.success(data));
     }
 
+    @GetMapping("/recommendations/profile")
+    public ResponseEntity<ApiResponse> recommendationProfile(HttpServletRequest request) {
+        return ResponseEntity.ok(ApiResponse.success(coreService.recommendationProfile(authUserId(request))));
+    }
+
+    @PostMapping("/recommendations/refine")
+    public ResponseEntity<ApiResponse> refineRecommendation(HttpServletRequest request, @RequestBody Map<String, Object> body) {
+        Long uid = authUserId(request);
+        String preferenceText = (valueOf(body.get("preference_text")) + " " + valueOf(body.get("feedback"))).trim();
+        String category = nullableString(body.get("category"));
+        Long canteenId = body.get("canteen_id") == null ? null : num(body.get("canteen_id"));
+        int limit = intValue(body.get("limit"), 5);
+        int seed = intValue(body.get("seed"), 0);
+        List<Map<String, Object>> items = coreService.recommendFeed(uid, preferenceText, canteenId, category, true, limit, seed);
+        return ResponseEntity.ok(ApiResponse.success(Map.of(
+            "list", items,
+            "summary", items.isEmpty() ? "没有找到符合新条件的窗口，可以放宽筛选。" : "已根据你的补充要求重新推荐。"
+        )));
+    }
+
     @DeleteMapping("/admin/reviews/{id}")
     public ResponseEntity<ApiResponse> adminDeleteReview(HttpServletRequest request, @PathVariable Long id) {
         ResponseEntity<ApiResponse> guard = requireAdmin(request);
@@ -319,6 +357,25 @@ public class ApiController {
         Map<String, Object> item = coreService.softDeleteReview(id);
         if (item == null) return notFound("not_found");
         return ResponseEntity.ok(ApiResponse.success(item));
+    }
+
+    @GetMapping("/admin/dashboard")
+    public ResponseEntity<ApiResponse> adminDashboard(HttpServletRequest request) {
+        ResponseEntity<ApiResponse> guard = requireAdmin(request);
+        if (guard != null) return guard;
+        return ResponseEntity.ok(ApiResponse.success(coreService.adminDashboard()));
+    }
+
+    @GetMapping("/admin/reviews")
+    public ResponseEntity<ApiResponse> adminReviews(HttpServletRequest request,
+                                                    @RequestParam(defaultValue = "1") int page,
+                                                    @RequestParam(name = "page_size", defaultValue = "20") int pageSize,
+                                                    @RequestParam(name = "stall_id", required = false) Long stallId,
+                                                    @RequestParam(required = false) String keyword,
+                                                    @RequestParam(required = false) String status) {
+        ResponseEntity<ApiResponse> guard = requireAdmin(request);
+        if (guard != null) return guard;
+        return ResponseEntity.ok(ApiResponse.success(coreService.adminReviews(page, pageSize, stallId, keyword, status)));
     }
 
     @PostMapping("/admin/stalls")

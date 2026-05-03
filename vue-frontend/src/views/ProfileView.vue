@@ -16,6 +16,7 @@ const reviews = ref([])
 const favorites = ref([])
 const blacklist = ref([])
 const history = ref([])
+const tasteProfile = ref(null)
 
 const load = async () => {
   await userStore.refreshMe()
@@ -30,16 +31,18 @@ const load = async () => {
     preference_text: userStore.user.preference_text || '',
     avatar_url: userStore.user.avatar_url || '',
   })
-  const [r, f, b, h] = await Promise.all([
+  const [r, f, b, h, p] = await Promise.all([
     api.myReviews({ page: 1, page_size: 50 }),
     api.favorites({ page: 1, page_size: 50 }),
     api.blacklist({ page: 1, page_size: 50 }),
     api.history({ page: 1, page_size: 50 }),
+    api.recommendationProfile(),
   ])
   reviews.value = r.data?.list || []
   favorites.value = f.data?.list || []
   blacklist.value = b.data?.list || []
   history.value = h.data?.list || []
+  tasteProfile.value = p.data || null
 }
 
 const readAvatar = (event) => {
@@ -112,6 +115,24 @@ onMounted(load)
       <h3 style="margin:0 0 6px;">{{ profile.username }}</h3>
       <p class="muted">{{ profile.student_id }} · {{ userStore.isAdmin ? '管理员' : '普通用户' }}</p>
       <p>{{ profile.signature || '还没有签名。' }}</p>
+    </div>
+  </section>
+
+  <section v-if="tasteProfile" class="panel stack" style="margin-bottom:16px;">
+    <h3>口味画像</h3>
+    <p class="muted">{{ tasteProfile.summary }}</p>
+    <div class="row">
+      <span class="user-pill">评价 {{ tasteProfile.review_count || 0 }}</span>
+      <span class="user-pill">收藏 {{ tasteProfile.favorite_count || 0 }}</span>
+      <span class="user-pill">避雷 {{ tasteProfile.blacklist_count || 0 }}</span>
+    </div>
+    <div v-if="tasteProfile.favorite_categories?.length" class="row">
+      <strong>常看分类</strong>
+      <span v-for="c in tasteProfile.favorite_categories" :key="c.category" class="user-pill">{{ c.category }} · {{ c.count }}</span>
+    </div>
+    <div v-if="tasteProfile.favorite_tags?.length" class="row">
+      <strong>高频标签</strong>
+      <span v-for="t in tasteProfile.favorite_tags" :key="t.name" class="user-pill">{{ t.name }} · {{ t.count }}</span>
     </div>
   </section>
 

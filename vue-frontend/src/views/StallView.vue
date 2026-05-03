@@ -12,6 +12,7 @@ const toast = useToast()
 const detail = ref(null)
 const reviews = ref([])
 const form = reactive({ rating: 5, content: '' })
+const reportReason = ref('')
 
 const load = async () => {
   const id = route.params.id
@@ -53,6 +54,23 @@ const addBlack = async () => {
   else toast.error(r.message || '操作失败')
 }
 
+const likeReview = async (id) => {
+  if (!requireLogin()) return
+  const r = await api.likeReview(id)
+  if (r.code !== 0) return toast.error(r.message || '点赞失败')
+  toast.success('已点赞')
+  await load()
+}
+
+const reportReview = async (id) => {
+  if (!requireLogin()) return
+  const r = await api.reportReview(id, { reason: reportReason.value || '内容不合适' })
+  if (r.code !== 0) return toast.error(r.message || '举报失败')
+  reportReason.value = ''
+  toast.success('已提交举报')
+  await load()
+}
+
 onMounted(load)
 </script>
 
@@ -84,12 +102,20 @@ onMounted(load)
   </form>
 
   <h3>评价列表</h3>
+  <div v-if="reviews.length" class="panel row" style="margin-bottom:12px;">
+    <input v-model="reportReason" style="flex:1 1 260px;" placeholder="举报原因，可选" />
+    <span class="muted">点击某条评价的举报按钮会提交给管理员处理</span>
+  </div>
   <article v-for="r in reviews" :key="r.id" class="card">
     <div class="row" style="justify-content:space-between;">
       <strong>{{ r.username || '匿名用户' }}</strong>
       <span class="score">{{ r.rating }} 分</span>
     </div>
     <p>{{ r.content || '这位同学没有留下文字评价。' }}</p>
+    <div class="row">
+      <button class="secondary" type="button" @click="likeReview(r.id)">有用 {{ r.like_count || 0 }}</button>
+      <button class="secondary" type="button" @click="reportReview(r.id)">举报 {{ r.report_count || 0 }}</button>
+    </div>
     <small class="muted">{{ r.updated_at || r.created_at }}</small>
   </article>
   <div v-if="!reviews.length" class="empty panel">暂无评价。</div>

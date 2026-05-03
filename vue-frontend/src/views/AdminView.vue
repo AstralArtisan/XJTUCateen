@@ -8,12 +8,16 @@ import { useUserStore } from '../stores/user'
 const router = useRouter()
 const user = useUserStore()
 const toast = useToast()
-const activeTab = ref('tags')
+const activeTab = ref('dashboard')
 const users = ref([])
 const tags = ref([])
 const canteens = ref([])
 const categories = ref([])
 const stalls = ref([])
+const dashboard = ref(null)
+const adminReviews = ref([])
+const reviewTotal = ref(0)
+const reviewFilters = reactive({ keyword: '', stall_id: '', status: '' })
 const form = reactive({
   tag: '',
   tagDesc: '',
@@ -34,18 +38,29 @@ const load = async () => {
     router.push('/profile')
     return
   }
-  const [u, t, c, g, s] = await Promise.all([
+  const [u, t, c, g, s, d] = await Promise.all([
     api.adminUsers(),
     api.adminTags(),
     api.canteens(),
     api.categories(),
     api.stalls({ page: 1, page_size: 100 }),
+    api.adminDashboard(),
   ])
   users.value = u.data?.list || []
   tags.value = t.data?.list || []
   canteens.value = c.data?.list || []
   categories.value = g.data?.list || []
   stalls.value = s.data?.list || []
+  dashboard.value = d.data || null
+  await loadAdminReviews()
+}
+
+const cleanReviewFilters = () => Object.fromEntries(Object.entries(reviewFilters).filter(([, v]) => v !== ''))
+
+const loadAdminReviews = async () => {
+  const r = await api.adminReviews({ page: 1, page_size: 50, ...cleanReviewFilters() })
+  adminReviews.value = r.data?.list || []
+  reviewTotal.value = r.data?.total || 0
 }
 
 const createTag = async () => {
@@ -96,6 +111,16 @@ const deleteReview = async () => {
   if (r.code !== 0) return toast.error(r.message || '删除失败')
   form.reviewId = ''
   toast.success('评论已删除')
+  const [, dashboardData] = await Promise.all([
+    loadAdminReviews(),
+    api.adminDashboard(),
+  ])
+  dashboard.value = dashboardData.data || null
+}
+
+const deleteReviewById = async (id) => {
+  form.reviewId = id
+  await deleteReview()
 }
 
 const setRole = async (item, role) => {
@@ -111,12 +136,41 @@ onMounted(load)
 <template>
   <h2>管理后台</h2>
   <div class="tabs">
+    <button type="button" :class="{ active: activeTab === 'dashboard' }" @click="activeTab = 'dashboard'">看板</button>
     <button type="button" :class="{ active: activeTab === 'tags' }" @click="activeTab = 'tags'">标签</button>
     <button type="button" :class="{ active: activeTab === 'canteens' }" @click="activeTab = 'canteens'">食堂</button>
     <button type="button" :class="{ active: activeTab === 'stalls' }" @click="activeTab = 'stalls'">窗口</button>
     <button type="button" :class="{ active: activeTab === 'reviews' }" @click="activeTab = 'reviews'">评论</button>
     <button type="button" :class="{ active: activeTab === 'users' }" @click="activeTab = 'users'">用户</button>
   </div>
+
+  <section v-if="activeTab === 'dashboard' && dashboard" class="stack">
+    <div class="grid">
+      <article class="card"><h3>用户</h3><p class="score">{{ dashboard.user_count }}</p></article>
+      <article class="card"><h3>营业窗口</h3><p class="score">{{ dashboard.stall_count }}</p></article>
+      <article class="card"><h3>有效评价</h3><p class="score">{{ dashboard.review_count }}</p></article>
+      <article class="card"><h3>待处理举报</h3><p class="score">{{ dashboard.pending_report_count }}</p></article>
+    </div>
+    <section class="panel">
+      <h3>热门窗口</h3>
+      <div v-for="s in dashboard.top_stalls || []" :key="s.stall_id" class="rank-row">
+        <span>#</span>
+        <RouterLink :to="`/stall/${s.stall_id}`">{{ s.stall_name }}</RouterLink>
+        <small class="muted">{{ s.canteen_name }}</small>
+        <strong>{{ s.review_count }} 条</strong>
+      </div>
+    </section>
+    <section class="panel">
+      <h3>低分关注</h3>
+      <div v-for="s in dashboard.low_score_stalls || []" :key="s.stall_id" class="rank-row">
+        <span>#</span>
+        <RouterLink :to="`/stall/${s.stall_id}`">{{ s.stall_name }}</RouterLink>
+        <small class="muted">{{ s.canteen_name }}</small>
+        <strong>{{ Number(s.avg_rating || 0).toFixed(1) }} 分</strong>
+      </div>
+      <div v-if="!dashboard.low_score_stalls?.length" class="empty">暂无需要关注的低分窗口。</div>
+    </section>
+  </section>
 
   <section v-if="activeTab === 'tags'" class="panel stack">
     <form class="row" @submit.prevent="createTag">
@@ -181,6 +235,36 @@ onMounted(load)
   </section>
 
   <section v-if="activeTab === 'reviews'" class="panel stack">
+    <form class="toolbar" @submit.prevent="loadAdminReviews">
+      <input v-model="reviewFilters.keyword" placeholder="搜索评论、用户或窗口" />
+      <select v-model="reviewFilters.stall_id">
+        <option value="">全部窗口</option>
+        <option v-for="s in stalls" :key="s.id" :value="s.id">{{ s.name }}</option>
+      </select>
+      <select v-model="reviewFilters.status">
+        <option value="">正常评论</option>
+        <option value="deleted">已删除</option>
+      </select>
+      <button type="submit">筛选</button>
+    </form>
+    <p class="muted">共 {{ reviewTotal }} 条评论，举报数高的会排在前面。</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>ID</th><th>窗口</th><th>用户</th><th>评分</th><th>内容</th><th>有用</th><th>举报</th><th>操作</th></tr></thead>
+        <tbody>
+          <tr v-for="r in adminReviews" :key="r.id">
+            <td>{{ r.id }}</td>
+            <td>{{ r.stall_name }}</td>
+            <td>{{ r.username }}</td>
+            <td>{{ r.rating }}</td>
+            <td>{{ r.content || '-' }}</td>
+            <td>{{ r.like_count || 0 }}</td>
+            <td>{{ r.report_count || 0 }}</td>
+            <td><button v-if="!r.is_deleted" class="danger" type="button" @click="deleteReviewById(r.id)">删除</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <form class="row" @submit.prevent="deleteReview">
       <input v-model="form.reviewId" placeholder="评论 ID" required />
       <button class="danger" type="submit">删除评论</button>

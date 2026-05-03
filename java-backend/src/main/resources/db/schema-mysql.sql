@@ -72,6 +72,32 @@ CREATE TABLE IF NOT EXISTS review (
     CONSTRAINT fk_review_stall FOREIGN KEY (stall_id) REFERENCES stall(id)
 );
 
+CREATE TABLE IF NOT EXISTS review_like (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT NOT NULL,
+    review_id BIGINT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_user_review_like (user_id, review_id),
+    KEY idx_review_like_review_id (review_id),
+    CONSTRAINT fk_review_like_user FOREIGN KEY (user_id) REFERENCES user(id),
+    CONSTRAINT fk_review_like_review FOREIGN KEY (review_id) REFERENCES review(id)
+);
+
+CREATE TABLE IF NOT EXISTS review_report (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT NOT NULL,
+    review_id BIGINT NOT NULL,
+    reason TEXT NULL,
+    status INT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_user_review_report (user_id, review_id),
+    KEY idx_review_report_review_id (review_id),
+    KEY idx_review_report_status (status),
+    CONSTRAINT fk_review_report_user FOREIGN KEY (user_id) REFERENCES user(id),
+    CONSTRAINT fk_review_report_review FOREIGN KEY (review_id) REFERENCES review(id)
+);
+
 CREATE TABLE IF NOT EXISTS favorite (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
@@ -100,3 +126,6 @@ CREATE TABLE IF NOT EXISTS history (
     CONSTRAINT fk_history_user FOREIGN KEY (user_id) REFERENCES user(id),
     CONSTRAINT fk_history_stall FOREIGN KEY (stall_id) REFERENCES stall(id)
 );
+
+INSERT IGNORE INTO user (student_id, username, password_hash, role, status)
+VALUES ('admin001', '管理员', 'WEpUVUNhbnRlZW5BZG1pbpe2ZjZQ1t8UgCJlIFH5TrXNYAdPFp5ynWwNOOSeVLvb', 1, 1);

@@ -14,17 +14,20 @@ import java.util.*;
 
 @Service
 public class LlmService {
-    private static final String DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions";
-
     private final ObjectMapper mapper = new ObjectMapper();
     private final HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
+    private final String apiUrl;
     private final String apiKey;
     private final String model;
 
-    public LlmService(@Value("${DEEPSEEK_API_KEY:}") String apiKey,
-                      @Value("${DEEPSEEK_MODEL:deepseek-chat}") String model) {
-        this.apiKey = apiKey;
-        this.model = model;
+    public LlmService(@Value("${LLM_API_URL:}") String apiUrl,
+                      @Value("${LLM_API_KEY:}") String apiKey,
+                      @Value("${LLM_MODEL:}") String model,
+                      @Value("${DEEPSEEK_API_KEY:}") String deepseekApiKey,
+                      @Value("${DEEPSEEK_MODEL:deepseek-chat}") String deepseekModel) {
+        this.apiUrl = apiUrl == null || apiUrl.isBlank() ? "https://api.deepseek.com/v1/chat/completions" : normalizeChatCompletionsUrl(apiUrl);
+        this.apiKey = apiKey == null || apiKey.isBlank() ? deepseekApiKey : apiKey;
+        this.model = model == null || model.isBlank() ? deepseekModel : model;
     }
 
     public Map<String, Object> recommendWithDeepseek(String preferenceText, String category, List<Map<String, Object>> candidates, Map<String, Object> userContext) {
@@ -52,7 +55,7 @@ public class LlmService {
             ));
             body.put("temperature", 0.3);
 
-            HttpRequest request = HttpRequest.newBuilder(URI.create(DEEPSEEK_URL))
+            HttpRequest request = HttpRequest.newBuilder(URI.create(apiUrl))
                 .timeout(Duration.ofSeconds(30))
                 .header("Authorization", "Bearer " + apiKey)
                 .header("Content-Type", "application/json")
@@ -73,7 +76,7 @@ public class LlmService {
             if (parsed == null) {
                 return Map.of(
                     "enabled", true,
-                    "source", "deepseek",
+                    "source", "llm",
                     "model", model,
                     "summary", content.isBlank() ? "给你找到了几家，具体看下面的推荐。" : content,
                     "tips", "可以换个描述再试试，说得越具体推荐越准。",
@@ -90,7 +93,7 @@ public class LlmService {
             if (picked.isEmpty()) picked = defaultIds(candidates);
             return Map.of(
                 "enabled", true,
-                "source", "deepseek",
+                "source", "llm",
                 "model", model,
                 "summary", Objects.toString(parsed.getOrDefault("summary", "给你挑了几家，看看合不合口味。")),
                 "tips", Objects.toString(parsed.getOrDefault("tips", "口味变了随时可以重新说，我再给你找找。")),
@@ -110,6 +113,14 @@ public class LlmService {
             "tips", "下面是根据评分和热度给你挑的，仅供参考。",
             "picked_ids", defaultIds(candidates)
         );
+    }
+
+    private String normalizeChatCompletionsUrl(String rawUrl) {
+        String url = rawUrl.trim();
+        if (url.endsWith("/")) url = url.substring(0, url.length() - 1);
+        if (url.endsWith("/chat/completions")) return url;
+        if (url.endsWith("/v1")) return url + "/chat/completions";
+        return url + "/v1/chat/completions";
     }
 
     private List<Integer> defaultIds(List<Map<String, Object>> candidates) {

@@ -143,6 +143,53 @@ class CoreServiceIntegrationTest extends CanteenTestBase {
         assertThat((Integer) coreService.queryStalls(1, 20, null, null, "新增测试窗口", null, null).get("total")).isZero();
     }
 
+    @Test
+    void reviewLikesReportsAndAdminDashboardExposeGovernanceData() {
+        Long cid = insertCanteen("治理食堂");
+        Long sid = insertStall(cid, "治理窗口", "快餐");
+        Long author = insertUser("gov001", "作者", 0);
+        Long reader = insertUser("gov002", "读者", 0);
+        Long otherReader = insertUser("gov003", "另一个读者", 0);
+        Map<String, Object> review = coreService.createOrUpdateReview(author, sid, 4, "味道不错");
+        Long reviewId = ((Number) review.get("id")).longValue();
+
+        assertThat(coreService.likeReview(reader, reviewId).get("like_count")).isEqualTo(1);
+        assertThat(coreService.reportReview(reader, reviewId, "疑似广告").get("report_count")).isEqualTo(1);
+        assertThat(coreService.reportReview(reader, reviewId, "重复点击").get("report_count")).isEqualTo(1);
+        assertThat(coreService.reportReview(otherReader, reviewId, "内容不合适").get("report_count")).isEqualTo(2);
+
+        Map<String, Object> page = coreService.adminReviews(1, 10, sid, "治理", null);
+        assertThat((Integer) page.get("total")).isEqualTo(1);
+        assertThat(first(page).get("like_count")).isEqualTo(1L);
+        assertThat(first(page).get("report_count")).isEqualTo(2L);
+
+        Map<String, Object> dashboard = coreService.adminDashboard();
+        assertThat(dashboard.get("pending_report_count")).isEqualTo(2);
+        assertThat((List<?>) dashboard.get("top_stalls")).isNotEmpty();
+
+        coreService.softDeleteReview(reviewId);
+        dashboard = coreService.adminDashboard();
+        assertThat(dashboard.get("pending_report_count")).isEqualTo(0);
+    }
+
+    @Test
+    void recommendationProfileSummarizesUserBehavior() {
+        Long cid = insertCanteen("画像食堂");
+        Long sid = insertStall(cid, "画像窗口", "面条");
+        Long user = insertUser("profile001", "画像用户", 0);
+        jdbc.update("UPDATE user SET preference_text = ? WHERE id = ?", "少油，喜欢面", user);
+        coreService.addFavorite(user, sid);
+        coreService.addHistory(user, sid);
+        coreService.createOrUpdateReview(user, sid, 5, "会再来");
+
+        Map<String, Object> profile = coreService.recommendationProfile(user);
+
+        assertThat(profile.get("logged_in")).isEqualTo(true);
+        assertThat(String.valueOf(profile.get("summary"))).contains("少油");
+        assertThat((List<?>) profile.get("favorite_categories")).isNotEmpty();
+        assertThat(profile.get("review_count")).isEqualTo(1);
+    }
+
     @SuppressWarnings("unchecked")
     private Map<String, Object> first(Map<String, Object> page) {
         return ((List<Map<String, Object>>) page.get("list")).get(0);

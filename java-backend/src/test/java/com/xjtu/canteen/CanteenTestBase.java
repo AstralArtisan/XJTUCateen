@@ -16,7 +16,7 @@ public abstract class CanteenTestBase {
     @BeforeEach
     void resetDatabase() {
         jdbc.execute("SET REFERENTIAL_INTEGRITY FALSE");
-        for (String table : new String[]{"history", "blacklist", "favorite", "review", "stall_tag", "tag", "stall", "canteen", "user"}) {
+        for (String table : new String[]{"history", "blacklist", "favorite", "review_report", "review_like", "review", "stall_tag", "tag", "stall", "canteen", "user"}) {
             jdbc.execute("TRUNCATE TABLE " + table + " RESTART IDENTITY");
         }
         jdbc.execute("SET REFERENTIAL_INTEGRITY TRUE");

@@ -230,11 +230,33 @@ public class CoreService {
         if ("score_desc".equals(sortBy)) order = " ORDER BY r.rating DESC, r.created_at DESC, r.id DESC ";
         int total = jdbc.queryForObject("SELECT COUNT(*) FROM review WHERE stall_id = ? AND is_deleted = 0", Integer.class, stallId);
         List<Map<String, Object>> list = jdbc.queryForList(
-            "SELECT r.id, r.user_id, u.username, r.rating, r.content, r.created_at, r.updated_at " +
+            "SELECT r.id, r.user_id, u.username, r.rating, r.content, r.created_at, r.updated_at, " +
+                "(SELECT COUNT(*) FROM review_like rl WHERE rl.review_id = r.id) AS like_count, " +
+                "(SELECT COUNT(DISTINCT rr.user_id) FROM review_report rr WHERE rr.review_id = r.id AND rr.status = 0) AS report_count " +
                 "FROM review r JOIN user u ON u.id = r.user_id WHERE r.stall_id = ? AND r.is_deleted = 0 " + order + " LIMIT ? OFFSET ?",
             stallId, pageSize, (page - 1) * pageSize
         );
         return pagePayload(list, total, page, pageSize);
+    }
+
+    public Map<String, Object> likeReview(Long userId, Long reviewId) {
+        if (one("SELECT id FROM review WHERE id = ? AND is_deleted = 0", reviewId) == null) return null;
+        jdbc.update("INSERT IGNORE INTO review_like (user_id, review_id) VALUES (?, ?)", userId, reviewId);
+        Integer count = jdbc.queryForObject("SELECT COUNT(*) FROM review_like WHERE review_id = ?", Integer.class, reviewId);
+        return Map.of("result", "success", "like_count", count == null ? 0 : count);
+    }
+
+    public Map<String, Object> reportReview(Long userId, Long reviewId, String reason) {
+        if (one("SELECT id FROM review WHERE id = ? AND is_deleted = 0", reviewId) == null) return null;
+        Map<String, Object> report = one("SELECT id, user_id, review_id, reason, status, created_at FROM review_report WHERE user_id = ? AND review_id = ?", userId, reviewId);
+        if (report == null) {
+            Long id = insertAndReturnId("INSERT INTO review_report (user_id, review_id, reason) VALUES (?, ?, ?)",
+                userId, reviewId, nullableValue(reason));
+            report = one("SELECT id, user_id, review_id, reason, status, created_at FROM review_report WHERE id = ?", id);
+        }
+        Integer count = jdbc.queryForObject("SELECT COUNT(DISTINCT user_id) FROM review_report WHERE review_id = ? AND status = 0", Integer.class, reviewId);
+        report.put("report_count", count == null ? 0 : count);
+        return report;
     }
 
     public Map<String, Object> getMyReviews(Long userId, int page, int pageSize) {
@@ -366,6 +388,56 @@ public class CoreService {
         return jdbc.queryForList("SELECT id, student_id, username, role, status, avatar_url, signature, created_at FROM user ORDER BY role DESC, id ASC");
     }
 
+    public Map<String, Object> adminDashboard() {
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("user_count", count("SELECT COUNT(*) FROM user"));
+        data.put("stall_count", count("SELECT COUNT(*) FROM stall WHERE status = 1"));
+        data.put("review_count", count("SELECT COUNT(*) FROM review WHERE is_deleted = 0"));
+        data.put("pending_report_count", count(
+            "SELECT COUNT(DISTINCT CONCAT(rr.user_id, ':', rr.review_id)) FROM review_report rr JOIN review r ON r.id = rr.review_id WHERE rr.status = 0 AND r.is_deleted = 0"
+        ));
+        data.put("favorite_count", count("SELECT COUNT(*) FROM favorite"));
+        data.put("history_count", count("SELECT COUNT(*) FROM history"));
+        data.put("top_stalls", jdbc.queryForList(
+            "SELECT s.id AS stall_id, s.name AS stall_name, c.name AS canteen_name, ROUND(s.avg_rating, 2) AS avg_rating, s.review_count " +
+                "FROM stall s JOIN canteen c ON c.id = s.canteen_id WHERE s.status = 1 ORDER BY s.review_count DESC, s.avg_rating DESC LIMIT 5"
+        ));
+        data.put("low_score_stalls", jdbc.queryForList(
+            "SELECT s.id AS stall_id, s.name AS stall_name, c.name AS canteen_name, ROUND(s.avg_rating, 2) AS avg_rating, s.review_count " +
+                "FROM stall s JOIN canteen c ON c.id = s.canteen_id WHERE s.status = 1 AND s.review_count > 0 ORDER BY s.avg_rating ASC, s.review_count DESC LIMIT 5"
+        ));
+        return data;
+    }
+
+    public Map<String, Object> adminReviews(int page, int pageSize, Long stallId, String keyword, String status) {
+        StringBuilder base = new StringBuilder(
+            " FROM review r JOIN user u ON u.id = r.user_id JOIN stall s ON s.id = r.stall_id JOIN canteen c ON c.id = s.canteen_id WHERE 1 = 1 "
+        );
+        List<Object> params = new ArrayList<>();
+        if ("deleted".equals(status)) base.append(" AND r.is_deleted = 1 ");
+        else base.append(" AND r.is_deleted = 0 ");
+        if (stallId != null) { base.append(" AND r.stall_id = ? "); params.add(stallId); }
+        if (notBlank(keyword)) {
+            base.append(" AND (r.content LIKE ? OR u.username LIKE ? OR s.name LIKE ?) ");
+            String like = "%" + keyword + "%";
+            params.add(like);
+            params.add(like);
+            params.add(like);
+        }
+        int total = jdbc.queryForObject("SELECT COUNT(*) " + base, Integer.class, params.toArray());
+        List<Object> queryParams = new ArrayList<>(params);
+        queryParams.add(pageSize);
+        queryParams.add((page - 1) * pageSize);
+        List<Map<String, Object>> list = jdbc.queryForList(
+            "SELECT r.id, r.user_id, u.username, r.stall_id, s.name AS stall_name, c.name AS canteen_name, r.rating, r.content, r.is_deleted, r.created_at, r.updated_at, " +
+                "(SELECT COUNT(*) FROM review_like rl WHERE rl.review_id = r.id) AS like_count, " +
+                "(SELECT COUNT(DISTINCT rr.user_id) FROM review_report rr WHERE rr.review_id = r.id AND rr.status = 0) AS report_count " +
+                base + " ORDER BY report_count DESC, r.updated_at DESC, r.id DESC LIMIT ? OFFSET ?",
+            queryParams.toArray()
+        );
+        return pagePayload(list, total, page, pageSize);
+    }
+
     public Map<String, Object> updateUserRole(Long userId, int role) {
         if (one("SELECT id FROM user WHERE id = ?", userId) == null) return null;
         jdbc.update("UPDATE user SET role = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?", role, userId);
@@ -385,6 +457,49 @@ public class CoreService {
     public List<Map<String, Object>> recommendFeed(Long userId, String preferenceText, Long canteenId, String category, boolean excludeBlacklist, int limit, int seed) {
         List<Map<String, Object>> ranked = rankCandidates(userId, preferenceText, canteenId, category, excludeBlacklist);
         return rotateAndPick(ranked, limit, seed + (userId == null ? 0 : userId.intValue()));
+    }
+
+    public Map<String, Object> recommendationProfile(Long userId) {
+        Map<String, Object> data = new LinkedHashMap<>();
+        data.put("logged_in", userId != null);
+        if (userId == null) {
+            data.put("summary", "登录后可根据收藏、评价和浏览记录生成口味画像。");
+            data.put("favorite_categories", List.of());
+            data.put("favorite_tags", List.of());
+            data.put("recent_stalls", List.of());
+            return data;
+        }
+        Map<String, Object> user = one("SELECT preference_text FROM user WHERE id = ?", userId);
+        String preference = user == null ? "" : valueOf(user.get("preferenceText"));
+        List<Map<String, Object>> categories = jdbc.queryForList(
+            "SELECT s.category, COUNT(*) AS count FROM (" +
+                "SELECT stall_id FROM favorite WHERE user_id = ? UNION ALL " +
+                "SELECT stall_id FROM review WHERE user_id = ? AND is_deleted = 0 AND rating >= 4 UNION ALL " +
+                "SELECT stall_id FROM history WHERE user_id = ?" +
+                ") x JOIN stall s ON s.id = x.stall_id WHERE s.category IS NOT NULL GROUP BY s.category ORDER BY count DESC LIMIT 5",
+            userId, userId, userId
+        );
+        List<Map<String, Object>> tags = jdbc.queryForList(
+            "SELECT t.name, COUNT(*) AS count FROM (" +
+                "SELECT stall_id FROM favorite WHERE user_id = ? UNION ALL " +
+                "SELECT stall_id FROM review WHERE user_id = ? AND is_deleted = 0 AND rating >= 4" +
+                ") x JOIN stall_tag st ON st.stall_id = x.stall_id JOIN tag t ON t.id = st.tag_id GROUP BY t.name ORDER BY count DESC LIMIT 8",
+            userId, userId
+        );
+        List<Map<String, Object>> recent = jdbc.queryForList(
+            "SELECT s.id AS stall_id, s.name AS stall_name, c.name AS canteen_name, h.visited_at " +
+                "FROM history h JOIN stall s ON s.id = h.stall_id JOIN canteen c ON c.id = s.canteen_id WHERE h.user_id = ? ORDER BY h.visited_at DESC LIMIT 5",
+            userId
+        );
+        data.put("preference_text", preference);
+        data.put("favorite_categories", categories);
+        data.put("favorite_tags", tags);
+        data.put("recent_stalls", recent);
+        data.put("review_count", count("SELECT COUNT(*) FROM review WHERE user_id = ? AND is_deleted = 0", userId));
+        data.put("favorite_count", count("SELECT COUNT(*) FROM favorite WHERE user_id = ?", userId));
+        data.put("blacklist_count", count("SELECT COUNT(*) FROM blacklist WHERE user_id = ?", userId));
+        data.put("summary", buildProfileSummary(preference, categories, tags));
+        return data;
     }
 
     private void recalculateStallStats(Long stallId) {
@@ -514,6 +629,20 @@ public class CoreService {
         data.put("page", page);
         data.put("page_size", pageSize);
         return data;
+    }
+
+    private int count(String sql, Object... params) {
+        Integer value = jdbc.queryForObject(sql, Integer.class, params);
+        return value == null ? 0 : value;
+    }
+
+    private String buildProfileSummary(String preference, List<Map<String, Object>> categories, List<Map<String, Object>> tags) {
+        List<String> parts = new ArrayList<>();
+        if (notBlank(preference)) parts.add("你填写的偏好是：" + preference);
+        if (!categories.isEmpty()) parts.add("常看的分类偏向 " + categories.stream().limit(3).map(r -> valueOf(r.get("category"))).collect(Collectors.joining("、")));
+        if (!tags.isEmpty()) parts.add("高频标签是 " + tags.stream().limit(3).map(r -> valueOf(r.get("name"))).collect(Collectors.joining("、")));
+        if (parts.isEmpty()) return "还没有足够行为数据，先收藏、评价或浏览几个窗口后会更准确。";
+        return String.join("；", parts) + "。";
     }
 
     private Map<String, Object> sanitizeUser(Map<String, Object> row) {

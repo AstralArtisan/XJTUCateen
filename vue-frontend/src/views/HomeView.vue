@@ -12,7 +12,11 @@ const today = ref(null)
 const aiCards = ref([])
 const aiSummary = ref('')
 const aiPrompt = ref('')
+const aiFeedback = ref('')
 const loading = ref(false)
+const page = ref(1)
+const total = ref(0)
+const profile = ref(null)
 const filters = reactive({ canteen_id: '', category: '', tag_name: '', keyword: '', sort_by: '' })
 
 const cleanParams = () => Object.fromEntries(Object.entries(filters).filter(([, v]) => v !== ''))
@@ -29,9 +33,17 @@ const loadBase = async () => {
   tags.value = t.data?.list || []
 }
 
-const loadStalls = async () => {
-  const r = await api.stalls({ page: 1, page_size: 30, ...cleanParams() })
-  stalls.value = r.data?.list || []
+const loadStalls = async (reset = true) => {
+  if (reset) page.value = 1
+  const r = await api.stalls({ page: page.value, page_size: 12, ...cleanParams() })
+  const list = r.data?.list || []
+  stalls.value = reset ? list : [...stalls.value, ...list]
+  total.value = r.data?.total || list.length
+}
+
+const loadMore = async () => {
+  page.value += 1
+  await loadStalls(false)
 }
 
 const pickToday = async () => {
@@ -51,9 +63,34 @@ const askAi = async () => {
   }
 }
 
+const refineAi = async () => {
+  const feedback = aiFeedback.value.trim()
+  if (!feedback) return
+  loading.value = true
+  try {
+    const nextPrompt = [aiPrompt.value.trim(), feedback].filter(Boolean).join(' ')
+    const r = await api.recommendFeed({
+      preference_text: nextPrompt,
+      limit: 3,
+      exclude_blacklist: true,
+      seed: Date.now() % 1000,
+    })
+    aiCards.value = r.data?.list || []
+    aiSummary.value = r.data?.ai_summary || '已根据你的补充要求重新推荐。'
+    aiPrompt.value = nextPrompt
+    aiFeedback.value = ''
+  } finally {
+    loading.value = false
+  }
+}
+
 onMounted(async () => {
   await loadBase()
   await loadStalls()
+  if (user.user) {
+    const r = await api.recommendationProfile()
+    profile.value = r.data || null
+  }
 })
 </script>
 
@@ -108,9 +145,14 @@ onMounted(async () => {
 
   <section v-if="user.user" class="panel stack" style="margin-bottom:16px;">
     <strong>AI 美食助手</strong>
+    <p v-if="profile?.summary" class="muted">{{ profile.summary }}</p>
     <div class="row">
       <input v-model="aiPrompt" style="flex:1 1 260px;" placeholder="想吃什么？例如：清淡、辣、预算15以内" @keydown.enter="askAi" />
       <button type="button" :disabled="loading" @click="askAi">{{ loading ? '推荐中...' : '获取推荐' }}</button>
+    </div>
+    <div v-if="aiCards.length" class="row">
+      <input v-model="aiFeedback" style="flex:1 1 260px;" placeholder="继续补充：太远了、不要辣、换便宜点" @keydown.enter="refineAi" />
+      <button class="secondary" type="button" :disabled="loading" @click="refineAi">换一组</button>
     </div>
     <p v-if="aiSummary" class="muted">{{ aiSummary }}</p>
     <div v-if="aiCards.length" class="grid">
@@ -133,4 +175,7 @@ onMounted(async () => {
     </article>
   </div>
   <div v-else class="empty panel">没有找到符合条件的窗口。</div>
+  <div v-if="stalls.length < total" class="row" style="justify-content:center;margin-top:16px;">
+    <button type="button" @click="loadMore">加载更多</button>
+  </div>
 </template>
