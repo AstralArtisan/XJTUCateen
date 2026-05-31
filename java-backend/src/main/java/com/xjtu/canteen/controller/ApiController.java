@@ -44,22 +44,22 @@ public class ApiController {
     @GetMapping("/auth/me")
     public ResponseEntity<ApiResponse> me(HttpServletRequest request) {
         Long uid = authUserId(request);
-        if (uid == null) return unauthorized("not_login");
+        if (uid == null) return unauthorized();
         Map<String, Object> user = coreService.getUserById(uid);
-        if (user == null) return unauthorized("not_login");
+        if (user == null) return unauthorized();
         return ResponseEntity.ok(ApiResponse.success(user));
     }
 
     @PostMapping("/auth/logout")
     public ResponseEntity<ApiResponse> logout(HttpServletRequest request) {
-        if (authUserId(request) == null) return unauthorized("not_login");
+        if (authUserId(request) == null) return unauthorized();
         return ResponseEntity.ok(ApiResponse.success(Map.of("result", "success")));
     }
 
     @PutMapping("/auth/password")
     public ResponseEntity<ApiResponse> changePassword(HttpServletRequest request, @RequestBody Map<String, Object> body) {
         Long uid = authUserId(request);
-        if (uid == null) return unauthorized("not_login");
+        if (uid == null) return unauthorized();
         boolean ok = coreService.changePassword(uid, valueOf(body.get("old_password")), valueOf(body.get("new_password")));
         if (!ok) return badRequest("原密码错误");
         return ResponseEntity.ok(ApiResponse.success(Map.of("result", "success")));
@@ -68,9 +68,9 @@ public class ApiController {
     @PutMapping("/users/me/profile")
     public ResponseEntity<ApiResponse> updateProfile(HttpServletRequest request, @RequestBody Map<String, Object> body) {
         Long uid = authUserId(request);
-        if (uid == null) return unauthorized("not_login");
+        if (uid == null) return unauthorized();
         Map<String, Object> result = coreService.updateProfile(uid, body);
-        if (result == null) return notFound("not_found");
+        if (result == null) return notFound();
         if (result.containsKey("_error")) return badRequest(valueOf(result.get("_error")));
         return ResponseEntity.ok(ApiResponse.success(result));
     }
@@ -83,7 +83,7 @@ public class ApiController {
     @GetMapping("/canteens/{id}")
     public ResponseEntity<ApiResponse> canteenDetail(@PathVariable Long id) {
         Map<String, Object> item = coreService.getCanteenDetail(id);
-        if (item == null) return notFound("not_found");
+        if (item == null) return notFound();
         return ResponseEntity.ok(ApiResponse.success(item));
     }
 
@@ -113,7 +113,7 @@ public class ApiController {
     @GetMapping("/stalls/{id}")
     public ResponseEntity<ApiResponse> stallDetail(@PathVariable Long id) {
         Map<String, Object> item = coreService.getStallDetail(id);
-        if (item == null) return notFound("not_found");
+        if (item == null) return notFound();
         return ResponseEntity.ok(ApiResponse.success(item));
     }
 
@@ -130,29 +130,29 @@ public class ApiController {
     @PostMapping("/reviews")
     public ResponseEntity<ApiResponse> submitReview(HttpServletRequest request, @RequestBody Map<String, Object> body) {
         Long uid = authUserId(request);
-        if (uid == null) return unauthorized("not_login");
+        if (uid == null) return unauthorized();
         int rating = num(body.get("rating")).intValue();
         if (rating < 1 || rating > 5) return badRequest("评分必须是 1 到 5");
         Map<String, Object> item = coreService.createOrUpdateReview(uid, num(body.get("stall_id")), rating, nullableString(body.get("content")));
-        if (item == null) return notFound("not_found");
+        if (item == null) return notFound();
         return ResponseEntity.ok(ApiResponse.success(item));
     }
 
     @PostMapping("/reviews/{id}/likes")
     public ResponseEntity<ApiResponse> likeReview(HttpServletRequest request, @PathVariable Long id) {
         Long uid = authUserId(request);
-        if (uid == null) return unauthorized("not_login");
+        if (uid == null) return unauthorized();
         Map<String, Object> item = coreService.likeReview(uid, id);
-        if (item == null) return notFound("not_found");
+        if (item == null) return notFound();
         return ResponseEntity.ok(ApiResponse.success(item));
     }
 
     @PostMapping("/reviews/{id}/reports")
     public ResponseEntity<ApiResponse> reportReview(HttpServletRequest request, @PathVariable Long id, @RequestBody Map<String, Object> body) {
         Long uid = authUserId(request);
-        if (uid == null) return unauthorized("not_login");
+        if (uid == null) return unauthorized();
         Map<String, Object> item = coreService.reportReview(uid, id, nullableString(body.get("reason")));
-        if (item == null) return notFound("not_found");
+        if (item == null) return notFound();
         return ResponseEntity.ok(ApiResponse.success(item));
     }
 
@@ -176,41 +176,41 @@ public class ApiController {
                                                  @RequestParam(defaultValue = "1") int page,
                                                  @RequestParam(name = "page_size", defaultValue = "10") int pageSize) {
         Long uid = authUserId(request);
-        if (uid == null) return unauthorized("not_login");
+        if (uid == null) return unauthorized();
         return ResponseEntity.ok(ApiResponse.success(coreService.getMyReviews(uid, page, pageSize)));
     }
 
     @PutMapping("/users/me/reviews/{id}")
     public ResponseEntity<ApiResponse> updateMyReview(HttpServletRequest request, @PathVariable Long id, @RequestBody Map<String, Object> body) {
         Long uid = authUserId(request);
-        if (uid == null) return unauthorized("not_login");
+        if (uid == null) return unauthorized();
         Map<String, Object> item = coreService.updateMyReview(uid, id, num(body.get("rating")).intValue(), nullableString(body.get("content")));
-        if (item == null) return notFound("not_found");
+        if (item == null) return notFound();
         return ResponseEntity.ok(ApiResponse.success(item));
     }
 
     @DeleteMapping("/users/me/reviews/{id}")
     public ResponseEntity<ApiResponse> deleteMyReview(HttpServletRequest request, @PathVariable Long id) {
         Long uid = authUserId(request);
-        if (uid == null) return unauthorized("not_login");
+        if (uid == null) return unauthorized();
         Map<String, Object> mine = coreService.getMyReviews(uid, 1, 1000);
         List<?> list = (List<?>) mine.getOrDefault("list", List.of());
         boolean exists = list.stream().anyMatch(row -> Objects.equals(num(((Map<?, ?>) row).get("id")), id));
-        if (!exists) return notFound("not_found");
+        if (!exists) return notFound();
         return ResponseEntity.ok(ApiResponse.success(coreService.softDeleteReview(id)));
     }
 
     @PostMapping("/users/me/favorites")
     public ResponseEntity<ApiResponse> addFavorite(HttpServletRequest request, @RequestBody Map<String, Object> body) {
         Long uid = authUserId(request);
-        if (uid == null) return unauthorized("not_login");
+        if (uid == null) return unauthorized();
         return ResponseEntity.ok(ApiResponse.success(coreService.addFavorite(uid, num(body.get("stall_id")))));
     }
 
     @DeleteMapping("/users/me/favorites/{stallId}")
     public ResponseEntity<ApiResponse> removeFavorite(HttpServletRequest request, @PathVariable Long stallId) {
         Long uid = authUserId(request);
-        if (uid == null) return unauthorized("not_login");
+        if (uid == null) return unauthorized();
         return ResponseEntity.ok(ApiResponse.success(coreService.removeFavorite(uid, stallId)));
     }
 
@@ -219,21 +219,21 @@ public class ApiController {
                                                  @RequestParam(defaultValue = "1") int page,
                                                  @RequestParam(name = "page_size", defaultValue = "10") int pageSize) {
         Long uid = authUserId(request);
-        if (uid == null) return unauthorized("not_login");
+        if (uid == null) return unauthorized();
         return ResponseEntity.ok(ApiResponse.success(coreService.favorites(uid, page, pageSize)));
     }
 
     @PostMapping("/users/me/blacklist")
     public ResponseEntity<ApiResponse> addBlacklist(HttpServletRequest request, @RequestBody Map<String, Object> body) {
         Long uid = authUserId(request);
-        if (uid == null) return unauthorized("not_login");
+        if (uid == null) return unauthorized();
         return ResponseEntity.ok(ApiResponse.success(coreService.addBlacklist(uid, num(body.get("stall_id")))));
     }
 
     @DeleteMapping("/users/me/blacklist/{stallId}")
     public ResponseEntity<ApiResponse> removeBlacklist(HttpServletRequest request, @PathVariable Long stallId) {
         Long uid = authUserId(request);
-        if (uid == null) return unauthorized("not_login");
+        if (uid == null) return unauthorized();
         return ResponseEntity.ok(ApiResponse.success(coreService.removeBlacklist(uid, stallId)));
     }
 
@@ -242,7 +242,7 @@ public class ApiController {
                                                   @RequestParam(defaultValue = "1") int page,
                                                   @RequestParam(name = "page_size", defaultValue = "10") int pageSize) {
         Long uid = authUserId(request);
-        if (uid == null) return unauthorized("not_login");
+        if (uid == null) return unauthorized();
         return ResponseEntity.ok(ApiResponse.success(coreService.blacklists(uid, page, pageSize)));
     }
 
@@ -251,14 +251,14 @@ public class ApiController {
                                                  @RequestParam(defaultValue = "1") int page,
                                                  @RequestParam(name = "page_size", defaultValue = "10") int pageSize) {
         Long uid = authUserId(request);
-        if (uid == null) return unauthorized("not_login");
+        if (uid == null) return unauthorized();
         return ResponseEntity.ok(ApiResponse.success(coreService.histories(uid, page, pageSize)));
     }
 
     @PostMapping("/users/me/history")
     public ResponseEntity<ApiResponse> addHistory(HttpServletRequest request, @RequestBody Map<String, Object> body) {
         Long uid = authUserId(request);
-        if (uid == null) return unauthorized("not_login");
+        if (uid == null) return unauthorized();
         return ResponseEntity.ok(ApiResponse.success(coreService.addHistory(uid, num(body.get("stall_id")))));
     }
 
@@ -355,7 +355,7 @@ public class ApiController {
         ResponseEntity<ApiResponse> guard = requireAdmin(request);
         if (guard != null) return guard;
         Map<String, Object> item = coreService.softDeleteReview(id);
-        if (item == null) return notFound("not_found");
+        if (item == null) return notFound();
         return ResponseEntity.ok(ApiResponse.success(item));
     }
 
@@ -390,7 +390,7 @@ public class ApiController {
         ResponseEntity<ApiResponse> guard = requireAdmin(request);
         if (guard != null) return guard;
         Map<String, Object> item = coreService.updateStall(id, body);
-        if (item == null) return notFound("not_found");
+        if (item == null) return notFound();
         return ResponseEntity.ok(ApiResponse.success(item));
     }
 
@@ -399,7 +399,7 @@ public class ApiController {
         ResponseEntity<ApiResponse> guard = requireAdmin(request);
         if (guard != null) return guard;
         Map<String, Object> item = coreService.disableStall(id);
-        if (item == null) return notFound("not_found");
+        if (item == null) return notFound();
         return ResponseEntity.ok(ApiResponse.success(Map.of("result", "success", "stall", item)));
     }
 
@@ -415,7 +415,7 @@ public class ApiController {
         ResponseEntity<ApiResponse> guard = requireAdmin(request);
         if (guard != null) return guard;
         Map<String, Object> item = coreService.updateCanteen(id, body);
-        if (item == null) return notFound("not_found");
+        if (item == null) return notFound();
         return ResponseEntity.ok(ApiResponse.success(item));
     }
 
@@ -435,7 +435,7 @@ public class ApiController {
         int role = intValue(body.get("role"), 0);
         if (role != 0 && role != 1) return badRequest("角色只能是 0 或 1");
         Map<String, Object> item = coreService.updateUserRole(id, role);
-        if (item == null) return notFound("not_found");
+        if (item == null) return notFound();
         return ResponseEntity.ok(ApiResponse.success(item));
     }
 
@@ -458,15 +458,15 @@ public class ApiController {
         ResponseEntity<ApiResponse> guard = requireAdmin(request);
         if (guard != null) return guard;
         Map<String, Object> item = coreService.updateTag(id, body);
-        if (item == null) return notFound("not_found");
+        if (item == null) return notFound();
         return ResponseEntity.ok(ApiResponse.success(item));
     }
 
     private ResponseEntity<ApiResponse> requireAdmin(HttpServletRequest request) {
         Long uid = authUserId(request);
-        if (uid == null) return unauthorized("not_login");
+        if (uid == null) return unauthorized();
         Integer role = authRole(request);
-        if (role == null || role < 1) return forbidden("forbidden");
+        if (role == null || role < 1) return forbidden();
         return null;
     }
 
@@ -484,16 +484,16 @@ public class ApiController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse(4010, message, null));
     }
 
-    private ResponseEntity<ApiResponse> unauthorized(String message) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse(4001, message, null));
+    private ResponseEntity<ApiResponse> unauthorized() {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse(4001, "not_login", null));
     }
 
-    private ResponseEntity<ApiResponse> forbidden(String message) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse(4003, message, null));
+    private ResponseEntity<ApiResponse> forbidden() {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiResponse(4003, "forbidden", null));
     }
 
-    private ResponseEntity<ApiResponse> notFound(String message) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(4004, message, null));
+    private ResponseEntity<ApiResponse> notFound() {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse(4004, "not_found", null));
     }
 
     private String valueOf(Object value) {

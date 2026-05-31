@@ -40,7 +40,7 @@ public class CoreService {
             "INSERT INTO user (student_id, username, password_hash, role, status) VALUES (?, ?, ?, 0, 1)",
             studentId, username, hash
         );
-        return sanitizeUser(one("SELECT * FROM user WHERE id = ?", id));
+        return sanitizeUser(Objects.requireNonNull(one("SELECT * FROM user WHERE id = ?", id)));
     }
 
     public Map<String, Object> login(String studentId, String password) {
@@ -80,7 +80,7 @@ public class CoreService {
             nullableValue(data.getOrDefault("preference_text", row.get("preferenceText"))),
             userId
         );
-        return sanitizeUser(one("SELECT * FROM user WHERE id = ?", userId));
+        return sanitizeUser(Objects.requireNonNull(one("SELECT * FROM user WHERE id = ?", userId)));
     }
 
     public List<Map<String, Object>> getAllCanteens() {
@@ -167,10 +167,9 @@ public class CoreService {
                 + base + orderClause + " LIMIT ? OFFSET ?",
             queryParams.toArray()
         );
-        List<Map<String, Object>> items = rows.stream().map(item -> {
+        List<Map<String, Object>> items = rows.stream().peek(item -> {
             Long id = ((Number) item.get("id")).longValue();
             item.put("tags", fetchTagNames(id));
-            return item;
         }).toList();
         return pagePayload(items, total, page, pageSize);
     }
@@ -243,7 +242,7 @@ public class CoreService {
         if (one("SELECT id FROM review WHERE id = ? AND is_deleted = 0", reviewId) == null) return null;
         jdbc.update("INSERT IGNORE INTO review_like (user_id, review_id) VALUES (?, ?)", userId, reviewId);
         Integer count = jdbc.queryForObject("SELECT COUNT(*) FROM review_like WHERE review_id = ?", Integer.class, reviewId);
-        return Map.of("result", "success", "like_count", count == null ? 0 : count);
+        return Map.of("result", "success", "like_count", count);
     }
 
     public Map<String, Object> reportReview(Long userId, Long reviewId, String reason) {
@@ -255,7 +254,8 @@ public class CoreService {
             report = one("SELECT id, user_id, review_id, reason, status, created_at FROM review_report WHERE id = ?", id);
         }
         Integer count = jdbc.queryForObject("SELECT COUNT(DISTINCT user_id) FROM review_report WHERE review_id = ? AND status = 0", Integer.class, reviewId);
-        report.put("report_count", count == null ? 0 : count);
+        if (report != null)
+            report.put("report_count", count);
         return report;
     }
 
@@ -385,7 +385,7 @@ public class CoreService {
     }
 
     public List<Map<String, Object>> listUsers() {
-        return jdbc.queryForList("SELECT id, student_id, username, role, status, avatar_url, signature, created_at FROM user ORDER BY role DESC, id ASC");
+        return jdbc.queryForList("SELECT id, student_id, username, role, status, avatar_url, signature, created_at FROM user ORDER BY role DESC, id ");
     }
 
     public Map<String, Object> adminDashboard() {
@@ -404,7 +404,7 @@ public class CoreService {
         ));
         data.put("low_score_stalls", jdbc.queryForList(
             "SELECT s.id AS stall_id, s.name AS stall_name, c.name AS canteen_name, ROUND(s.avg_rating, 2) AS avg_rating, s.review_count " +
-                "FROM stall s JOIN canteen c ON c.id = s.canteen_id WHERE s.status = 1 AND s.review_count > 0 ORDER BY s.avg_rating ASC, s.review_count DESC LIMIT 5"
+                "FROM stall s JOIN canteen c ON c.id = s.canteen_id WHERE s.status = 1 AND s.review_count > 0 ORDER BY s.avg_rating , s.review_count DESC LIMIT 5"
         ));
         return data;
     }
@@ -504,8 +504,9 @@ public class CoreService {
 
     private void recalculateStallStats(Long stallId) {
         Map<String, Object> agg = one("SELECT COUNT(*) AS review_count, COALESCE(AVG(rating), 0) AS avg_rating FROM review WHERE stall_id = ? AND is_deleted = 0", stallId);
-        jdbc.update("UPDATE stall SET review_count = ?, avg_rating = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
-            ((Number) agg.get("reviewCount")).intValue(), ((Number) agg.get("avgRating")).doubleValue(), stallId);
+        if (agg != null)
+            jdbc.update("UPDATE stall SET review_count = ?, avg_rating = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+                ((Number) agg.get("reviewCount")).intValue(), ((Number) agg.get("avgRating")).doubleValue(), stallId);
     }
 
     private List<Map<String, Object>> rankCandidates(Long userId, String preferenceText, Long canteenId, String category, boolean excludeBlacklist) {
@@ -597,7 +598,7 @@ public class CoreService {
         for (String tag : tags) {
             if (!seen.add(tag)) continue;
             Map<String, Object> existing = one("SELECT id FROM tag WHERE name = ?", tag);
-            Long tagId;
+            long tagId;
             if (existing == null) {
                 tagId = insertAndReturnId("INSERT INTO tag (name, description) VALUES (?, ?)", tag, tag + " 标签");
             } else {
@@ -632,8 +633,7 @@ public class CoreService {
     }
 
     private int count(String sql, Object... params) {
-        Integer value = jdbc.queryForObject(sql, Integer.class, params);
-        return value == null ? 0 : value;
+        return jdbc.queryForObject(sql, Integer.class, params);
     }
 
     private String buildProfileSummary(String preference, List<Map<String, Object>> categories, List<Map<String, Object>> tags) {

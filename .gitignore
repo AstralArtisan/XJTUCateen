@@ -12,3 +12,4 @@ vue-frontend/node_modules/
 vue-frontend/dist/
 *.log
 HANDOFF.md
+.idea
